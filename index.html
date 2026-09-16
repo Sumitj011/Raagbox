@@ -3,41 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>RaagBox — desi radio, genre by genre</title>
-
 <meta name="description" content="RaagBox plays Punjabi, Bollywood, Bhojpuri, Sufi and more as shuffled radio stations. Pick a genre, press play, no signup.">
 <meta name="theme-color" content="#16213E">
-
 <meta property="og:title" content="RaagBox — desi radio, genre by genre">
 <meta property="og:description" content="Pick a genre, press play. Shuffled desi radio, no signup.">
 <meta property="og:type" content="website">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
 <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@300;400;600;800&display=swap" rel="stylesheet">
-
 <style>
-
-:root{
-  --ink:#16213E;
-  --paper:#F6EDDD;
-  --marigold:#F2A93B;
-  --rani:#E0457B;
-  --enamel:#1F7A5C;
-  --bg:#F6EDDD;
-  --surface:#FFFFFF;
-  --surface-2:#F0E4CF;
-  --text:#16213E;
-  --text-dim:#5A6180;
-  --line:#D9C9AC;
-  --shadow:rgba(22,33,62,.18);
-}
-
-@media (prefers-color-scheme: dark){
-
-  :root:not([data-theme="light"]){
+  :root{
+    --ink:#16213E;
+    --paper:#F6EDDD;
+    --marigold:#F2A93B;
+    --rani:#E0457B;
+    --enamel:#1F7A5C;
+    --bg:#F6EDDD;
+    --surface:#FFFFFF;
+    --surface-2:#F0E4CF;
+    --text:#16213E;
+    --text-dim:#5A6180;
+    --line:#D9C9AC;
+    --shadow:rgba(22,33,62,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#101A33;
+      --surface:#182444;
+      --surface-2:#1F2D53;
+      --text:#F6EDDD;
+      --text-dim:#A8B2D1;
+      --line:#2E3C68;
+      --shadow:rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"]{
     --bg:#101A33;
     --surface:#182444;
     --surface-2:#1F2D53;
@@ -47,2168 +48,565 @@
     --shadow:rgba(0,0,0,.45);
   }
 
-}
-
-:root[data-theme="dark"]{
-  --bg:#101A33;
-  --surface:#182444;
-  --surface-2:#1F2D53;
-  --text:#F6EDDD;
-  --text-dim:#A8B2D1;
-  --line:#2E3C68;
-  --shadow:rgba(0,0,0,.45);
-}
-
-*{
-  box-sizing:border-box
-}
-
-html,body{
-  margin:0;
-  padding:0
-}
-
-body{
-
-  background:var(--bg);
-  color:var(--text);
-
-  font-family:"Mukta",system-ui,-apple-system,"Segoe UI",sans-serif;
-
-  font-size:17px;
-  line-height:1.6;
-
-  -webkit-font-smoothing:antialiased;
-
-  background-image:
-    radial-gradient(circle at 12% 8%, rgba(224,69,123,.10), transparent 45%),
-    radial-gradient(circle at 88% 0%, rgba(242,169,59,.12), transparent 40%);
-
-  background-attachment:fixed;
-}
-
-img{
-  max-width:100%
-}
-
-button{
-  font:inherit;
-  color:inherit;
-  cursor:pointer
-}
-
-a{
-  color:var(--rani)
-}
-
-:focus-visible{
-  outline:3px solid var(--marigold);
-  outline-offset:3px;
-  border-radius:4px
-}
-
-.wrap{
-  max-width:1080px;
-  margin:0 auto;
-  padding:22px 20px 70px
-}
-
-/* ---------- masthead ---------- */
-
-.top{
-  display:flex;
-  align-items:flex-end;
-  justify-content:space-between;
-  gap:16px;
-  flex-wrap:wrap;
-  margin-bottom:26px
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:14px
-}
-
-.dial{
-  width:58px;
-  height:58px;
-  flex:none;
-  position:relative
-}
-
-.dial svg{
-  display:block
-}
-
-.needle{
-  transform-origin:29px 29px;
-  animation:swing 1.5s cubic-bezier(.4,1.6,.5,1) 1
-}
-
-@keyframes swing{
-
-  0%{
-    transform:rotate(-62deg)
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Mukta",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:17px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(224,69,123,.10), transparent 45%),
+      radial-gradient(circle at 88% 0%, rgba(242,169,59,.12), transparent 40%);
+    background-attachment:fixed;
   }
+  img{max-width:100%}
+  button{font:inherit;color:inherit;cursor:pointer}
+  a{color:var(--rani)}
+  :focus-visible{outline:3px solid var(--marigold);outline-offset:3px;border-radius:4px}
 
-  55%{
-    transform:rotate(38deg)
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 20px 70px}
+
+  /* ---------- masthead ---------- */
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+  .brand{display:flex;align-items:center;gap:14px}
+  .dial{width:58px;height:58px;flex:none;position:relative}
+  .dial svg{display:block}
+  .needle{transform-origin:29px 29px;animation:swing 1.5s cubic-bezier(.4,1.6,.5,1) 1}
+  @keyframes swing{0%{transform:rotate(-62deg)}55%{transform:rotate(38deg)}100%{transform:rotate(0deg)}}
+  @media (prefers-reduced-motion: reduce){.needle{animation:none}}
+  h1{font-family:"Yatra One",cursive;font-weight:400;margin:0;line-height:1;
+     font-size:clamp(30px,6vw,44px);letter-spacing:.5px}
+  h1 .hi{display:block;font-size:.52em;color:var(--marigold);letter-spacing:1px;margin-bottom:2px}
+  .tagline{margin:4px 0 0;color:var(--text-dim);font-size:15px}
+  .topbtns{display:flex;gap:8px}
+  .ghost{background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:7px 15px;font-size:14px;font-weight:600}
+  .ghost:hover{border-color:var(--marigold)}
+
+  /* ---------- deck ---------- */
+  .deck{
+    background:var(--surface);
+    border:2px solid var(--ink);
+    border-radius:26px;
+    box-shadow:0 14px 0 -6px var(--marigold), 0 22px 40px var(--shadow);
+    overflow:hidden;
   }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .deck{border-color:#2E3C68}}
+  :root[data-theme="dark"] .deck{border-color:#2E3C68}
 
-  100%{
-    transform:rotate(0deg)
+  .screen{position:relative;background:#0B1226;aspect-ratio:16/9;width:100%;overflow:hidden}
+  .screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;z-index:1}
+  /* wallpaper sits on top of the frame — audio keeps playing underneath */
+  #wall{position:absolute;inset:0;z-index:2;pointer-events:none}
+  #wall svg{width:100%;height:100%;display:block}
+  #wallLabel{
+    position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 18px;
+    display:flex;align-items:flex-end;justify-content:space-between;gap:14px;
+    background:linear-gradient(to top, rgba(8,13,28,.72), transparent);
+    color:#F6EDDD;pointer-events:none
   }
-
-}
-
-@media (prefers-reduced-motion: reduce){
-
-  .needle{
-    animation:none
+  #wallLabel .st{font-family:"Yatra One",cursive;font-size:clamp(20px,3.4vw,30px);line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  #wallLabel .sub{font-size:13.5px;opacity:.8}
+  .empty{
+    position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;text-align:center;padding:26px;background:rgba(11,18,38,.82);color:#F6EDDD;backdrop-filter:blur(3px)
   }
+  .empty p{margin:0;max-width:34ch;color:#C7CEE4}
+  .empty strong{font-family:"Yatra One",cursive;font-weight:400;font-size:22px}
 
-}
-
-h1{
-
-  font-family:"Yatra One",cursive;
-  font-weight:400;
-  margin:0;
-  line-height:1;
-
-  font-size:clamp(30px,6vw,44px);
-  letter-spacing:.5px
-}
-
-h1 .hi{
-  display:block;
-  font-size:.52em;
-  color:var(--marigold);
-  letter-spacing:1px;
-  margin-bottom:2px
-}
-
-.tagline{
-  margin:4px 0 0;
-  color:var(--text-dim);
-  font-size:15px
-}
-
-.topbtns{
-  display:flex;
-  gap:8px
-}
-
-.ghost{
-  background:transparent;
-  border:1.5px solid var(--line);
-  border-radius:999px;
-  padding:7px 15px;
-  font-size:14px;
-  font-weight:600
-}
-
-.ghost:hover{
-  border-color:var(--marigold)
-}
-
-/* ---------- deck ---------- */
-
-.deck{
-
-  background:var(--surface);
-
-  border:2px solid var(--ink);
-  border-radius:26px;
-
-  box-shadow:
-    0 14px 0 -6px var(--marigold),
-    0 22px 40px var(--shadow);
-
-  overflow:hidden;
-}
-
-@media (prefers-color-scheme: dark){
-
-  :root:not([data-theme="light"]) .deck{
-    border-color:#2E3C68
+  .controls{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:2px solid var(--line);flex-wrap:wrap}
+  .rnd{
+    width:52px;height:52px;border-radius:50%;border:2px solid var(--ink);background:var(--surface-2);
+    display:grid;place-items:center;flex:none
   }
-
-}
-
-:root[data-theme="dark"] .deck{
-  border-color:#2E3C68
-}
-
-/* ---------- PLAYER SCREEN ---------- */
-
-.screen{
-
-  position:relative;
-
-  background:#000;
-
-  aspect-ratio:16/9;
-
-  width:100%;
-
-  overflow:hidden;
-}
-
-/* Wallpaper */
-
-.wallpaper{
-
-  position:absolute;
-
-  inset:0;
-
-  width:100%;
-  height:100%;
-
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
-  z-index:1;
-
-  transition:background-image .5s ease;
-}
-
-.wallpaper::after{
-
-  content:"";
-
-  position:absolute;
-
-  inset:0;
-
-  background:rgba(0,0,0,.18);
-}
-
-/* YouTube player stays active but invisible */
-
-.screen iframe{
-
-  position:absolute;
-
-  inset:0;
-
-  width:100%;
-  height:100%;
-
-  border:0;
-
-  opacity:0;
-
-  pointer-events:none;
-
-  z-index:0;
-}
-
-/* Empty station message */
-
-.empty{
-
-  position:absolute;
-
-  inset:0;
-
-  display:flex;
-
-  flex-direction:column;
-
-  align-items:center;
-
-  justify-content:center;
-
-  gap:12px;
-
-  text-align:center;
-
-  padding:26px;
-
-  background:var(--surface-2);
-
-  color:var(--text);
-
-  z-index:3;
-}
-
-.empty p{
-
-  margin:0;
-
-  max-width:34ch;
-
-  color:var(--text-dim)
-}
-
-.empty strong{
-
-  font-family:"Yatra One",cursive;
-
-  font-weight:400;
-
-  font-size:22px
-}
-
-/* ---------- controls ---------- */
-
-.controls{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:10px;
-
-  padding:14px 16px;
-
-  border-top:2px solid var(--line);
-
-  flex-wrap:wrap
-}
-
-.rnd{
-
-  width:52px;
-
-  height:52px;
-
-  border-radius:50%;
-
-  border:2px solid var(--ink);
-
-  background:var(--surface-2);
-
-  display:grid;
-
-  place-items:center;
-
-  flex:none
-}
-
-.rnd:hover{
-
-  background:var(--marigold);
-
-  color:var(--ink)
-}
-
-.rnd.big{
-
-  width:64px;
-
-  height:64px;
-
-  background:var(--marigold);
-
-  color:var(--ink);
-
-  border-color:var(--ink)
-}
-
-.rnd.big:hover{
-
-  background:var(--rani);
-
-  color:#fff
-}
-
-@media (prefers-color-scheme: dark){
-
-  :root:not([data-theme="light"]) .rnd{
-    border-color:#3A4A7E
+  .rnd:hover{background:var(--marigold);color:var(--ink)}
+  .rnd.big{width:64px;height:64px;background:var(--marigold);color:var(--ink);border-color:var(--ink)}
+  .rnd.big:hover{background:var(--rani);color:#fff}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rnd{border-color:#3A4A7E}}
+  :root[data-theme="dark"] .rnd{border-color:#3A4A7E}
+  .nowbox{flex:1 1 180px;min-width:0}
+  .nowbox .label{font-size:12px;letter-spacing:.06em;color:var(--text-dim)}
+  .nowbox .name{font-family:"Yatra One",cursive;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vol{display:flex;align-items:center;gap:8px;flex:0 1 150px}
+  .vol input{width:100%;accent-color:var(--rani)}
+
+  /* ---------- stations ---------- */
+  .sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:38px 0 14px;flex-wrap:wrap}
+  h2{font-family:"Yatra One",cursive;font-weight:400;font-size:24px;margin:0}
+  .hint{color:var(--text-dim);font-size:14px;margin:0}
+
+  .stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+  .plate{
+    position:relative;text-align:left;background:var(--surface);border:2px solid var(--line);
+    border-radius:16px;padding:14px 14px 12px;transition:transform .12s ease,border-color .12s ease
   }
-
-}
-
-:root[data-theme="dark"] .rnd{
-  border-color:#3A4A7E
-}
-
-.nowbox{
-
-  flex:1 1 180px;
-
-  min-width:0
-}
-
-.nowbox .label{
-
-  font-size:12px;
-
-  letter-spacing:.06em;
-
-  color:var(--text-dim)
-}
-
-.nowbox .name{
-
-  font-family:"Yatra One",cursive;
-
-  font-size:19px;
-
-  white-space:nowrap;
-
-  overflow:hidden;
-
-  text-overflow:ellipsis
-}
-
-.vol{
-
-  display:flex;
-
-  align-items:center;
-
-  gap:8px;
-
-  flex:0 1 150px
-}
-
-.vol input{
-
-  width:100%;
-
-  accent-color:var(--rani)
-}
-
-/* ---------- stations ---------- */
-
-.sechead{
-
-  display:flex;
-
-  align-items:baseline;
-
-  justify-content:space-between;
-
-  gap:12px;
-
-  margin:38px 0 14px;
-
-  flex-wrap:wrap
-}
-
-h2{
-
-  font-family:"Yatra One",cursive;
-
-  font-weight:400;
-
-  font-size:24px;
-
-  margin:0
-}
-
-.hint{
-
-  color:var(--text-dim);
-
-  font-size:14px;
-
-  margin:0
-}
-
-.stations{
-
-  display:grid;
-
-  grid-template-columns:repeat(auto-fill,minmax(168px,1fr));
-
-  gap:14px
-}
-
-.plate{
-
-  position:relative;
-
-  text-align:left;
-
-  background:var(--surface);
-
-  border:2px solid var(--line);
-
-  border-radius:16px;
-
-  padding:14px 14px 12px;
-
-  transition:
-    transform .12s ease,
-    border-color .12s ease
-}
-
-.plate:hover{
-
-  transform:translateY(-2px);
-
-  border-color:var(--accent,var(--marigold))
-}
-
-.plate[aria-pressed="true"]{
-
-  border-color:var(--accent,var(--marigold));
-
-  background:var(--surface-2)
-}
-
-.plate .dot{
-
-  width:12px;
-
-  height:12px;
-
-  border-radius:50%;
-
-  background:var(--accent,var(--marigold));
-
-  margin-bottom:10px
-}
-
-.plate .en{
-
-  font-family:"Yatra One",cursive;
-
-  font-size:19px;
-
-  line-height:1.2
-}
-
-.plate .hi{
-
-  color:var(--text-dim);
-
-  font-size:14px
-}
-
-.plate .off{
-
-  margin-top:6px;
-
-  font-size:12.5px;
-
-  color:var(--rani);
-
-  font-weight:600
-}
-
-.plate[aria-pressed="true"] .bars{
-
-  position:absolute;
-
-  top:14px;
-
-  right:14px;
-
-  display:flex;
-
-  gap:2px;
-
-  align-items:flex-end;
-
-  height:14px
-}
-
-.bars i{
-
-  width:3px;
-
-  background:var(--accent,var(--marigold));
-
-  border-radius:2px;
-
-  animation:eq .9s ease-in-out infinite
-}
-
-.bars i:nth-child(2){
-  animation-delay:.15s
-}
-
-.bars i:nth-child(3){
-  animation-delay:.3s
-}
-
-@keyframes eq{
-
-  0%,100%{
-    height:4px
+  .plate:hover{transform:translateY(-2px);border-color:var(--accent,var(--marigold))}
+  .plate[aria-pressed="true"]{border-color:var(--accent,var(--marigold));background:var(--surface-2)}
+  .plate .dot{width:12px;height:12px;border-radius:50%;background:var(--accent,var(--marigold));margin-bottom:10px}
+  .plate .en{font-family:"Yatra One",cursive;font-size:19px;line-height:1.2}
+  .plate .hi{color:var(--text-dim);font-size:14px}
+  .plate .off{margin-top:6px;font-size:12.5px;color:var(--rani);font-weight:600}
+  .plate[aria-pressed="true"] .bars{position:absolute;top:14px;right:14px;display:flex;gap:2px;align-items:flex-end;height:14px}
+  .bars i{width:3px;background:var(--accent,var(--marigold));border-radius:2px;animation:eq .9s ease-in-out infinite}
+  .bars i:nth-child(2){animation-delay:.15s}.bars i:nth-child(3){animation-delay:.3s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+  @media (prefers-reduced-motion: reduce){.bars i{animation:none;height:9px}}
+
+  /* ---------- owner panel ---------- */
+  .panel{margin-top:34px;border:2px dashed var(--line);border-radius:18px;padding:18px}
+  .panel[hidden]{display:none}
+  .row{display:grid;grid-template-columns:1.1fr 1fr 2fr auto auto;gap:10px;align-items:center;margin-bottom:10px}
+  .row input[type="text"]{width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text)}
+  .row input[type="color"]{width:42px;height:38px;padding:2px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg)}
+  .del{border:1.5px solid var(--line);background:transparent;border-radius:10px;padding:8px 11px;line-height:1}
+  .del:hover{border-color:var(--rani);color:var(--rani)}
+  .panel .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .solid{background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:10px 20px;font-weight:600}
+  :root[data-theme="dark"] .solid{background:var(--marigold);color:#16213E}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .solid{background:var(--marigold);color:#16213E}}
+  .solid:hover{background:var(--rani);color:#fff}
+  #exportBox{width:100%;margin-top:12px;min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+    padding:11px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text)}
+  #exportBox[hidden]{display:none}
+  .note{font-size:14px;color:var(--text-dim);margin:0 0 14px}
+
+  footer{margin-top:46px;padding-top:18px;border-top:2px solid var(--line);color:var(--text-dim);font-size:14px}
+
+  @media (max-width:720px){
+    .row{grid-template-columns:1fr 1fr;grid-auto-flow:row}
+    .row input[type="text"]:nth-child(3){grid-column:1 / -1}
   }
-
-  50%{
-    height:14px
-  }
-
-}
-
-@media (prefers-reduced-motion: reduce){
-
-  .bars i{
-
-    animation:none;
-
-    height:9px
-  }
-
-}
-
-/* ---------- owner panel ---------- */
-
-.panel{
-
-  margin-top:34px;
-
-  border:2px dashed var(--line);
-
-  border-radius:18px;
-
-  padding:18px
-}
-
-.panel[hidden]{
-  display:none
-}
-
-.row{
-
-  display:grid;
-
-  grid-template-columns:1.1fr 1fr 2fr auto auto;
-
-  gap:10px;
-
-  align-items:center;
-
-  margin-bottom:10px
-}
-
-.row input[type="text"]{
-
-  width:100%;
-
-  padding:9px 11px;
-
-  border:1.5px solid var(--line);
-
-  border-radius:10px;
-
-  background:var(--bg);
-
-  color:var(--text)
-}
-
-.row input[type="color"]{
-
-  width:42px;
-
-  height:38px;
-
-  padding:2px;
-
-  border:1.5px solid var(--line);
-
-  border-radius:10px;
-
-  background:var(--bg)
-}
-
-.del{
-
-  border:1.5px solid var(--line);
-
-  background:transparent;
-
-  border-radius:10px;
-
-  padding:8px 11px;
-
-  line-height:1
-}
-
-.del:hover{
-
-  border-color:var(--rani);
-
-  color:var(--rani)
-}
-
-.panel .acts{
-
-  display:flex;
-
-  gap:10px;
-
-  flex-wrap:wrap;
-
-  margin-top:14px
-}
-
-.solid{
-
-  background:var(--ink);
-
-  color:var(--paper);
-
-  border:0;
-
-  border-radius:999px;
-
-  padding:10px 20px;
-
-  font-weight:600
-}
-
-:root[data-theme="dark"] .solid{
-
-  background:var(--marigold);
-
-  color:#16213E
-}
-
-@media (prefers-color-scheme: dark){
-
-  :root:not([data-theme="light"]) .solid{
-
-    background:var(--marigold);
-
-    color:#16213E
-  }
-
-}
-
-.solid:hover{
-
-  background:var(--rani);
-
-  color:#fff
-}
-
-#exportBox{
-
-  width:100%;
-
-  margin-top:12px;
-
-  min-height:110px;
-
-  font-family:ui-monospace,Menlo,Consolas,monospace;
-
-  font-size:12.5px;
-
-  padding:11px;
-
-  border:1.5px solid var(--line);
-
-  border-radius:12px;
-
-  background:var(--bg);
-
-  color:var(--text)
-}
-
-#exportBox[hidden]{
-  display:none
-}
-
-.note{
-
-  font-size:14px;
-
-  color:var(--text-dim);
-
-  margin:0 0 14px
-}
-
-footer{
-
-  margin-top:46px;
-
-  padding-top:18px;
-
-  border-top:2px solid var(--line);
-
-  color:var(--text-dim);
-
-  font-size:14px
-}
-
-@media (max-width:720px){
-
-  .row{
-
-    grid-template-columns:1fr 1fr;
-
-    grid-auto-flow:row
-  }
-
-  .row input[type="text"]:nth-child(3){
-
-    grid-column:1 / -1
-  }
-
-}
-
-.sr{
-
-  position:absolute;
-
-  width:1px;
-
-  height:1px;
-
-  overflow:hidden;
-
-  clip:rect(0 0 0 0);
-
-  white-space:nowrap
-}
-
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
-
 <body>
-
 <div class="wrap">
 
-<header class="top">
-
-  <div class="brand">
-
-    <div class="dial" aria-hidden="true">
-
-      <svg viewBox="0 0 58 58" width="58" height="58">
-
-        <circle
-          cx="29"
-          cy="29"
-          r="27"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        />
-
-        <path
-          d="M8 29a21 21 0 0 1 42 0"
-          fill="none"
-          stroke="#F2A93B"
-          stroke-width="3"
-          stroke-linecap="round"
-        />
-
-        <g class="needle">
-
-          <line
-            x1="29"
-            y1="29"
-            x2="29"
-            y2="11"
-            stroke="#E0457B"
-            stroke-width="3"
-            stroke-linecap="round"
-          />
-
-        </g>
-
-        <circle
-          cx="29"
-          cy="29"
-          r="4"
-          fill="currentColor"
-        />
-
-      </svg>
-
-    </div>
-
-    <div>
-
-      <h1>
-        <span class="hi">रागबॉक्स</span>
-        RaagBox
-      </h1>
-
-      <p class="tagline">
-        Ek genre chuno, baaki gaadi chalati rahegi.
-      </p>
-
-    </div>
-
-  </div>
-
-  <div class="topbtns">
-
-    <button class="ghost" id="themeBtn">
-      Light / dark
-    </button>
-
-    <button
-      class="ghost"
-      id="ownerBtn"
-      aria-expanded="false"
-    >
-      Manage stations
-    </button>
-
-  </div>
-
-</header>
-
-<main class="deck">
-
-  <div class="screen">
-
-    <!-- RANDOM WALLPAPER -->
-
-    <div
-      class="wallpaper"
-      id="wallpaper"
-      aria-hidden="true"
-    ></div>
-
-    <div class="empty" id="empty">
-
-      <strong>
-        Koi station on air nahi hai
-      </strong>
-
-      <p>
-        Neeche kisi genre pe tap karo.
-        Jis genre ka playlist khaali hai,
-        use "Manage stations" se apna YouTube playlist link do.
-      </p>
-
-    </div>
-
-    <!-- Invisible YouTube player -->
-
-    <iframe
-      id="player"
-      title="RaagBox player"
-      allow="autoplay; encrypted-media; picture-in-picture"
-      allowfullscreen
-      hidden
-    ></iframe>
-
-  </div>
-
-  <div class="controls">
-
-    <button
-      class="rnd"
-      id="prevBtn"
-      title="Pichla gaana"
-    >
-
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-
-        <path d="M6 5h2v14H6zm12 0v14l-9-7z"/>
-
-      </svg>
-
-      <span class="sr">
-        Previous
-      </span>
-
-    </button>
-
-    <button
-      class="rnd big"
-      id="playBtn"
-      title="Play / pause"
-    >
-
-      <svg
-        id="playIcon"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-
-        <path d="M7 4l13 8-13 8z"/>
-
-      </svg>
-
-      <span class="sr">
-        Play or pause
-      </span>
-
-    </button>
-
-    <button
-      class="rnd"
-      id="nextBtn"
-      title="Agla gaana"
-    >
-
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-
-        <path d="M16 5h2v14h-2zM6 5l9 7-9 7z"/>
-
-      </svg>
-
-      <span class="sr">
-        Next
-      </span>
-
-    </button>
-
-    <button
-      class="rnd"
-      id="shuffleBtn"
-      title="Dobara shuffle karo"
-    >
-
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-
-        <path d="M17 3l4 4-4 4V8h-2.2l-2.3 3-1.3-1.7L13.6 6H17V3zM3 6h4.4l8.4 11H17v-3l4 4-4 4v-3h-2.2L6.4 8H3V6zm0 11h3.4l2.3-3 1.3 1.7L7.4 19H3v-2z"/>
-
-      </svg>
-
-      <span class="sr">
-        Reshuffle
-      </span>
-
-    </button>
-
-    <div class="nowbox">
-
-      <div class="label">
-        On air
+  <header class="top">
+    <div class="brand">
+      <div class="dial" aria-hidden="true">
+        <svg viewBox="0 0 58 58" width="58" height="58">
+          <circle cx="29" cy="29" r="27" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M8 29a21 21 0 0 1 42 0" fill="none" stroke="#F2A93B" stroke-width="3" stroke-linecap="round"/>
+          <g class="needle"><line x1="29" y1="29" x2="29" y2="11" stroke="#E0457B" stroke-width="3" stroke-linecap="round"/></g>
+          <circle cx="29" cy="29" r="4" fill="currentColor"/>
+        </svg>
       </div>
-
-      <div class="name" id="nowName">
-        —
+      <div>
+        <h1><span class="hi">रागबॉक्स</span>RaagBox</h1>
+        <p class="tagline">Ek genre chuno, baaki gaadi chalati rahegi.</p>
       </div>
+    </div>
+    <div class="topbtns">
+      <button class="ghost" id="themeBtn">Light / dark</button>
+      <button class="ghost" id="ownerBtn" aria-expanded="false">Manage stations</button>
+    </div>
+  </header>
 
+  <main class="deck">
+    <div class="screen">
+      <div id="wall" aria-hidden="true"></div>
+      <div id="wallLabel">
+        <div class="st" id="wallStation">RaagBox</div>
+        <div class="sub" id="wallName"></div>
+      </div>
+      <div class="empty" id="empty">
+        <strong>Koi station on air nahi hai</strong>
+        <p>Neeche kisi genre pe tap karo. Jis genre ka playlist khaali hai, use "Manage stations" se apna YouTube playlist link do.</p>
+      </div>
+      <iframe id="player" title="RaagBox player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
     </div>
 
-    <div class="vol">
-
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        aria-hidden="true"
-      >
-
-        <path d="M4 9h3l5-4v14l-5-4H4zm12.5 3a3.5 3.5 0 0 0-2-3.2v6.4a3.5 3.5 0 0 0 2-3.2z"/>
-
-      </svg>
-
-      <input
-        type="range"
-        id="vol"
-        min="0"
-        max="100"
-        value="80"
-        aria-label="Volume"
-      >
-
+    <div class="controls">
+      <button class="rnd" id="prevBtn" title="Pichla gaana"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zm12 0v14l-9-7z"/></svg><span class="sr">Previous</span></button>
+      <button class="rnd big" id="playBtn" title="Play / pause"><svg id="playIcon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg><span class="sr">Play or pause</span></button>
+      <button class="rnd" id="nextBtn" title="Agla gaana"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM6 5l9 7-9 7z"/></svg><span class="sr">Next</span></button>
+      <button class="rnd" id="shuffleBtn" title="Dobara shuffle karo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3l4 4-4 4V8h-2.2l-2.3 3-1.3-1.7L13.6 6H17V3zM3 6h4.4l8.4 11H17v-3l4 4-4 4v-3h-2.2L6.4 8H3V6zm0 11h3.4l2.3-3 1.3 1.7L7.4 19H3v-2z"/></svg><span class="sr">Reshuffle</span></button>
+      <div class="nowbox">
+        <div class="label">On air</div>
+        <div class="name" id="nowName">—</div>
+      </div>
+      <div class="vol">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9h3l5-4v14l-5-4H4zm12.5 3a3.5 3.5 0 0 0-2-3.2v6.4a3.5 3.5 0 0 0 2-3.2z"/></svg>
+        <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume">
+      </div>
     </div>
+  </main>
 
-  </div>
+  <section>
+    <div class="sechead">
+      <h2>Stations</h2>
+      <p class="hint">Har station apni playlist ko shuffle karke chalata hai — gaane repeat nahi honge jab tak poori list khatam na ho.</p>
+    </div>
+    <div class="stations" id="stations"></div>
+  </section>
 
-</main>
+  <section class="panel" id="panel" hidden>
+    <h2>Manage stations</h2>
+    <p class="note">Naam, rang aur YouTube playlist link edit karo. Save karne se ye isi browser me rakha jaata hai. Sabke liye permanent karna ho to "Copy config" dabao aur code ke <code>DEFAULT_STATIONS</code> me paste kar do.</p>
+    <div id="rows"></div>
+    <div class="acts">
+      <button class="ghost" id="addRow">Add station</button>
+      <button class="solid" id="saveBtn">Save stations</button>
+      <button class="ghost" id="copyBtn">Copy config</button>
+      <button class="ghost" id="resetBtn">Reset to default</button>
+    </div>
+    <textarea id="exportBox" hidden readonly aria-label="Station config"></textarea>
+  </section>
 
-<section>
-
-  <div class="sechead">
-
-    <h2>
-      Stations
-    </h2>
-
-    <p class="hint">
-      Har station apni playlist ko shuffle karke chalata hai —
-      gaane repeat nahi honge jab tak poori list khatam na ho.
-    </p>
-
-  </div>
-
-  <div
-    class="stations"
-    id="stations"
-  ></div>
-
-</section>
-
-<section
-  class="panel"
-  id="panel"
-  hidden
->
-
-  <h2>
-    Manage stations
-  </h2>
-
-  <p class="note">
-
-    Naam, rang aur YouTube playlist link edit karo.
-    Save karne se ye isi browser me rakha jaata hai.
-    Sabke liye permanent karna ho to "Copy config" dabao
-    aur code ke <code>DEFAULT_STATIONS</code> me paste kar do.
-
-  </p>
-
-  <div id="rows"></div>
-
-  <div class="acts">
-
-    <button
-      class="ghost"
-      id="addRow"
-    >
-      Add station
-    </button>
-
-    <button
-      class="solid"
-      id="saveBtn"
-    >
-      Save stations
-    </button>
-
-    <button
-      class="ghost"
-      id="copyBtn"
-    >
-      Copy config
-    </button>
-
-    <button
-      class="ghost"
-      id="resetBtn"
-    >
-      Reset to default
-    </button>
-
-  </div>
-
-  <textarea
-    id="exportBox"
-    hidden
-    readonly
-    aria-label="Station config"
-  ></textarea>
-
-</section>
-
-<footer>
-
-  RaagBox — gaane YouTube se chalte hain.
-  Koi signup nahi, koi account nahi.
-
-</footer>
-
+  <footer>
+    RaagBox — gaane YouTube se chalte hain. Koi signup nahi, koi account nahi.
+  </footer>
 </div>
 
 <script>
-
 /* ============================================================
-   RANDOM WALLPAPERS
+   RaagBox config — yahan apne stations set karo.
+   playlist: YouTube playlist ka link ya sirf ID (PL... se shuru).
    ============================================================ */
-
-const WALLPAPERS = [
-
-  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1600&q=80",
-
-  "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1600&q=80"
-
-];
-
-function setRandomWallpaper(){
-
-  const wallpaper = $("wallpaper");
-
-  if(!wallpaper) return;
-
-  const randomIndex =
-    Math.floor(Math.random() * WALLPAPERS.length);
-
-  wallpaper.style.backgroundImage =
-    'url("' + WALLPAPERS[randomIndex] + '")';
-}
-
-/* Set wallpaper whenever site loads */
-
-setRandomWallpaper();
-
-
-/* ============================================================
-   RaagBox config
-   ============================================================ */
-
 const DEFAULT_STATIONS = [
-
-  {
-    en:"Punjabi",
-    hi:"ਪੰਜਾਬੀ",
-    color:"#E0457B",
-    playlist:""
-  },
-
-  {
-    en:"Bollywood 90s",
-    hi:"नब्बे का दौर",
-    color:"#F2A93B",
-    playlist:""
-  },
-
-  {
-    en:"Bhojpuri",
-    hi:"भोजपुरी",
-    color:"#1F7A5C",
-    playlist:""
-  },
-
-  {
-    en:"Sufi",
-    hi:"सूफ़ी",
-    color:"#7B5EA7",
-    playlist:""
-  },
-
-  {
-    en:"Haryanvi",
-    hi:"हरियाणवी",
-    color:"#C9482A",
-    playlist:""
-  },
-
-  {
-    en:"Lo-fi Desi",
-    hi:"लो-फ़ाई",
-    color:"#2E7FA8",
-    playlist:""
-  },
-
-  {
-    en:"Ghazal",
-    hi:"ग़ज़ल",
-    color:"#9B7B2F",
-    playlist:""
-  },
-
-  {
-    en:"Trucker Mix",
-    hi:"हॉर्न ओके प्लीज़",
-    color:"#D93F87",
-    playlist:""
-  }
-
+  { en:"Punjabi",      hi:"ਪੰਜਾਬੀ",        color:"#E0457B", playlist:"" },
+  { en:"Bollywood 90s",hi:"नब्बे का दौर",   color:"#F2A93B", playlist:"" },
+  { en:"Bhojpuri",     hi:"भोजपुरी",        color:"#1F7A5C", playlist:"" },
+  { en:"Sufi",         hi:"सूफ़ी",          color:"#7B5EA7", playlist:"" },
+  { en:"Haryanvi",     hi:"हरियाणवी",       color:"#C9482A", playlist:"" },
+  { en:"Lo-fi Desi",   hi:"लो-फ़ाई",        color:"#2E7FA8", playlist:"" },
+  { en:"Ghazal",       hi:"ग़ज़ल",          color:"#9B7B2F", playlist:"" },
+  { en:"Trucker Mix",  hi:"हॉर्न ओके प्लीज़", color:"#D93F87", playlist:"" }
 ];
 
 const KEY = "raagbox.stations.v1";
-
-const $ = id =>
-  document.getElementById(id);
-
-let stations = [];
-
-let current = -1;
-
-let playing = false;
-
-let hs = null;
-
+const $ = id => document.getElementById(id);
+let stations = [], current = -1, playing = false, hs = null;
 
 /* ---------- storage ---------- */
-
 function load(){
-
   try{
-
-    const raw =
-      localStorage.getItem(KEY);
-
-    if(raw){
-
-      const p =
-        JSON.parse(raw);
-
-      if(Array.isArray(p) && p.length)
-        return p;
-
-    }
-
+    const raw = localStorage.getItem(KEY);
+    if(raw){ const p = JSON.parse(raw); if(Array.isArray(p) && p.length) return p; }
   }catch(e){}
-
-  return DEFAULT_STATIONS.map(
-    s => ({...s})
-  );
-
+  return DEFAULT_STATIONS.map(s => ({...s}));
 }
-
-
 function save(){
-
-  try{
-
-    localStorage.setItem(
-      KEY,
-      JSON.stringify(stations)
-    );
-
-    return true;
-
-  }catch(e){
-
-    return false;
-
-  }
-
+  try{ localStorage.setItem(KEY, JSON.stringify(stations)); return true; }
+  catch(e){ return false; }
 }
-
 
 /* ---------- helpers ---------- */
-
 function playlistId(v){
-
-  if(!v)
-    return "";
-
+  if(!v) return "";
   v = v.trim();
-
-  const m =
-    v.match(
-      /[?&]list=([A-Za-z0-9_-]+)/
-    );
-
-  if(m)
-    return m[1];
-
-  return /^[A-Za-z0-9_-]{12,}$/.test(v)
-    ? v
-    : "";
-
+  const m = v.match(/[?&]list=([A-Za-z0-9_-]+)/);
+  if(m) return m[1];
+  return /^[A-Za-z0-9_-]{12,}$/.test(v) ? v : "";
 }
 
-
-/* ---------- player bridge ---------- */
-
-function cmd(func,args){
-
-  const f =
-    $("player");
-
-  if(
-    !f ||
-    f.hidden ||
-    !f.contentWindow
-  )
-    return;
-
-  f.contentWindow.postMessage(
-
-    JSON.stringify({
-
-      event:"command",
-
-      func,
-
-      args:args || [],
-
-      id:1,
-
-      channel:"raagbox"
-
-    }),
-
-    "*"
-
-  );
-
+/* ---------- player bridge (YouTube postMessage, no extra script) ---------- */
+function cmd(func, args){
+  const f = $("player");
+  if(!f || f.hidden || !f.contentWindow) return;
+  f.contentWindow.postMessage(JSON.stringify({event:"command", func, args: args||[], id:1, channel:"raagbox"}), "*");
 }
-
-
 function startHandshake(){
-
   clearInterval(hs);
-
-  const f =
-    $("player");
-
+  const f = $("player");
   let n = 0;
-
   hs = setInterval(() => {
-
-    if(
-      !f.contentWindow ||
-      ++n > 40
-    ){
-
-      clearInterval(hs);
-
-      return;
-
-    }
-
-    f.contentWindow.postMessage(
-
-      JSON.stringify({
-
-        event:"listening",
-
-        id:1,
-
-        channel:"raagbox"
-
-      }),
-
-      "*"
-
-    );
-
-  },400);
-
+    if(!f.contentWindow || ++n > 40){ clearInterval(hs); return; }
+    f.contentWindow.postMessage(JSON.stringify({event:"listening", id:1, channel:"raagbox"}), "*");
+  }, 400);
 }
-
-
-/* ---------- YouTube messages ---------- */
-
-window.addEventListener(
-  "message",
-  e => {
-
-    if(
-      !/youtube(-nocookie)?\.com$/
-        .test(
-          new URL(e.origin)
-            .hostname
-            .replace(/^www\./,"")
-        )
-    )
-      return;
-
-    let d;
-
-    try{
-
-      d =
-        typeof e.data === "string"
-          ? JSON.parse(e.data)
-          : e.data;
-
-    }catch(err){
-
-      return;
-
-    }
-
-    if(
-      d &&
-      d.event === "onReady"
-    ){
-
-      cmd(
-        "setShuffle",
-        [true]
-      );
-
-      cmd(
-        "setVolume",
-        [Number($("vol").value)]
-      );
-
-    }
-
-    if(
-      d &&
-      d.info &&
-      typeof d.info.playerState === "number"
-    ){
-
-      playing =
-        d.info.playerState === 1;
-
-      setPlayIcon();
-
-    }
-
+window.addEventListener("message", e => {
+  if(!/youtube(-nocookie)?\.com$/.test(new URL(e.origin).hostname.replace(/^www\./,""))) return;
+  let d; try{ d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; }catch(err){ return; }
+  if(d && d.event === "onReady"){ cmd("setShuffle",[true]); cmd("setVolume",[Number($("vol").value)]); }
+  if(d && d.info && typeof d.info.playerState === "number"){
+    playing = d.info.playerState === 1;
+    setPlayIcon();
   }
-);
-
-
-/* ---------- play icon ---------- */
-
+});
 function setPlayIcon(){
-
-  $("playIcon").innerHTML =
-    playing
-
-      ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
-
-      : '<path d="M7 4l13 8-13 8z"/>';
-
+  $("playIcon").innerHTML = playing
+    ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
+    : '<path d="M7 4l13 8-13 8z"/>';
 }
-
 
 /* ---------- tuning ---------- */
-
 function tune(i){
-
-  const st =
-    stations[i];
-
-  if(!st)
-    return;
-
-  const id =
-    playlistId(st.playlist);
-
+  const st = stations[i];
+  if(!st) return;
+  const id = playlistId(st.playlist);
   current = i;
-
   renderStations();
-
-  $("nowName").textContent =
-    st.en;
-
+  $("nowName").textContent = st.en;
+  $("wallStation").textContent = st.en;
+  $("wallName").textContent = st.hi || "";
   if(!id){
-
     $("player").hidden = true;
-
     $("player").removeAttribute("src");
-
     $("empty").hidden = false;
-
-    $("empty")
-      .querySelector("strong")
-      .textContent =
-      st.en + " par abhi kuch nahi";
-
-    $("empty")
-      .querySelector("p")
-      .textContent =
-      'Is station ko on air lane ke liye "Manage stations" kholo aur ek YouTube playlist link paste karo.';
-
-    playing = false;
-
-    setPlayIcon();
-
+    $("empty").querySelector("strong").textContent = st.en + " par abhi kuch nahi";
+    $("empty").querySelector("p").textContent = 'Is station ko on air lane ke liye "Manage stations" kholo aur ek YouTube playlist link paste karo.';
+    playing = false; setPlayIcon();
     return;
-
   }
-
   $("empty").hidden = true;
-
-  const f =
-    $("player");
-
+  const f = $("player");
   f.hidden = false;
-
-  const start =
-    1 +
-    Math.floor(
-      Math.random() * 25
-    );
-
-  f.src =
-    "https://www.youtube-nocookie.com/embed/videoseries?list=" +
-    encodeURIComponent(id) +
-    "&index=" +
-    start +
-    "&autoplay=1" +
-    "&enablejsapi=1" +
-    "&rel=0" +
-    "&playsinline=1" +
-    "&modestbranding=1";
-
-  playing = true;
-
-  setPlayIcon();
-
+  const start = 1 + Math.floor(Math.random() * 25);
+  f.src = "https://www.youtube-nocookie.com/embed/videoseries?list=" + encodeURIComponent(id) +
+          "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
+  playing = true; setPlayIcon();
   startHandshake();
-
-  setTimeout(
-    () => cmd("setShuffle",[true]),
-    1800
-  );
-
+  setTimeout(() => cmd("setShuffle",[true]), 1800);
 }
-
 
 /* ---------- stations UI ---------- */
-
 function renderStations(){
-
-  const box =
-    $("stations");
-
+  const box = $("stations");
   box.innerHTML = "";
-
-  stations.forEach(
-    (s,i) => {
-
-      const b =
-        document.createElement(
-          "button"
-        );
-
-      b.className =
-        "plate";
-
-      b.style.setProperty(
-        "--accent",
-        s.color || "#F2A93B"
-      );
-
-      b.setAttribute(
-        "aria-pressed",
-        i === current
-          ? "true"
-          : "false"
-      );
-
-      b.innerHTML =
-
-        '<span class="dot"></span>' +
-
-        '<span class="bars">' +
-        '<i></i>' +
-        '<i></i>' +
-        '<i></i>' +
-        '</span>' +
-
-        '<div class="en"></div>' +
-
-        '<div class="hi"></div>' +
-
-        (
-          playlistId(s.playlist)
-            ? ""
-            : '<div class="off">playlist baaki hai</div>'
-        );
-
-      b.querySelector(".en")
-        .textContent =
-        s.en || "Untitled";
-
-      b.querySelector(".hi")
-        .textContent =
-        s.hi || "";
-
-      b.addEventListener(
-        "click",
-        () => tune(i)
-      );
-
-      box.appendChild(b);
-
-    }
-  );
-
+  stations.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "plate";
+    b.style.setProperty("--accent", s.color || "#F2A93B");
+    b.setAttribute("aria-pressed", i === current ? "true" : "false");
+    b.innerHTML = '<span class="dot"></span>' +
+      '<span class="bars"><i></i><i></i><i></i></span>' +
+      '<div class="en"></div><div class="hi"></div>' +
+      (playlistId(s.playlist) ? "" : '<div class="off">playlist baaki hai</div>');
+    b.querySelector(".en").textContent = s.en || "Untitled";
+    b.querySelector(".hi").textContent = s.hi || "";
+    b.addEventListener("click", () => tune(i));
+    box.appendChild(b);
+  });
 }
-
 
 /* ---------- owner panel ---------- */
-
 function renderRows(){
-
-  const box =
-    $("rows");
-
+  const box = $("rows");
   box.innerHTML = "";
-
-  stations.forEach(
-    (s,i) => {
-
-      const r =
-        document.createElement(
-          "div"
-        );
-
-      r.className =
-        "row";
-
-      r.innerHTML =
-
-        '<input type="text" placeholder="Genre (English)" aria-label="Genre name">' +
-
-        '<input type="text" placeholder="देसी नाम" aria-label="Local name">' +
-
-        '<input type="text" placeholder="YouTube playlist link ya ID" aria-label="Playlist">' +
-
-        '<input type="color" aria-label="Colour">' +
-
-        '<button class="del" aria-label="Remove station">✕</button>';
-
-      const [
-        en,
-        hi,
-        pl,
-        col
-      ] =
-        r.querySelectorAll(
-          "input"
-        );
-
-      en.value =
-        s.en || "";
-
-      hi.value =
-        s.hi || "";
-
-      pl.value =
-        s.playlist || "";
-
-      col.value =
-        s.color || "#F2A93B";
-
-      en.addEventListener(
-        "input",
-        e =>
-          s.en =
-          e.target.value
-      );
-
-      hi.addEventListener(
-        "input",
-        e =>
-          s.hi =
-          e.target.value
-      );
-
-      pl.addEventListener(
-        "input",
-        e =>
-          s.playlist =
-          e.target.value
-      );
-
-      col.addEventListener(
-        "input",
-        e =>
-          s.color =
-          e.target.value
-      );
-
-      r.querySelector(".del")
-        .addEventListener(
-          "click",
-          () => {
-
-            stations.splice(
-              i,
-              1
-            );
-
-            if(current === i){
-
-              current = -1;
-
-              $("player").hidden =
-                true;
-
-              $("empty").hidden =
-                false;
-
-              $("nowName")
-                .textContent =
-                "—";
-
-            }
-
-            renderRows();
-
-            renderStations();
-
-          }
-        );
-
-      box.appendChild(r);
-
-    }
-  );
-
+  stations.forEach((s, i) => {
+    const r = document.createElement("div");
+    r.className = "row";
+    r.innerHTML =
+      '<input type="text" placeholder="Genre (English)" aria-label="Genre name">' +
+      '<input type="text" placeholder="देसी नाम" aria-label="Local name">' +
+      '<input type="text" placeholder="YouTube playlist link ya ID" aria-label="Playlist">' +
+      '<input type="color" aria-label="Colour">' +
+      '<button class="del" aria-label="Remove station">✕</button>';
+    const [en, hi, pl, col] = r.querySelectorAll("input");
+    en.value = s.en || ""; hi.value = s.hi || ""; pl.value = s.playlist || ""; col.value = s.color || "#F2A93B";
+    en.addEventListener("input", e => s.en = e.target.value);
+    hi.addEventListener("input", e => s.hi = e.target.value);
+    pl.addEventListener("input", e => s.playlist = e.target.value);
+    col.addEventListener("input", e => s.color = e.target.value);
+    r.querySelector(".del").addEventListener("click", () => {
+      stations.splice(i,1);
+      if(current === i){ current = -1; $("player").hidden = true; $("empty").hidden = false; $("nowName").textContent = "—"; }
+      renderRows(); renderStations();
+    });
+    box.appendChild(r);
+  });
 }
 
-
 /* ---------- wiring ---------- */
-
-$("playBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      if(
-        $("player").hidden
-      ){
-
-        const first =
-          stations.findIndex(
-            s =>
-              playlistId(
-                s.playlist
-              )
-          );
-
-        if(first > -1)
-          tune(first);
-
-        return;
-
-      }
-
-      cmd(
-        playing
-          ? "pauseVideo"
-          : "playVideo"
-      );
-
-      playing =
-        !playing;
-
-      setPlayIcon();
-
-    }
-  );
-
-
-$("nextBtn")
-  .addEventListener(
-    "click",
-    () =>
-      cmd("nextVideo")
-  );
-
-
-$("prevBtn")
-  .addEventListener(
-    "click",
-    () =>
-      cmd("previousVideo")
-  );
-
-
-$("shuffleBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      cmd(
-        "setShuffle",
-        [true]
-      );
-
-      cmd(
-        "nextVideo"
-      );
-
-    }
-  );
-
-
-$("vol")
-  .addEventListener(
-    "input",
-    e =>
-      cmd(
-        "setVolume",
-        [Number(e.target.value)]
-      )
-  );
-
-
-$("ownerBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const open =
-        $("panel").hidden;
-
-      $("panel").hidden =
-        !open;
-
-      $("ownerBtn")
-        .setAttribute(
-          "aria-expanded",
-          String(open)
-        );
-
-      if(open){
-
-        renderRows();
-
-        $("panel")
-          .scrollIntoView({
-            behavior:"smooth",
-            block:"start"
-          });
-
-      }
-
-    }
-  );
-
-
-$("addRow")
-  .addEventListener(
-    "click",
-    () => {
-
-      stations.push({
-
-        en:"New station",
-
-        hi:"",
-
-        color:"#F2A93B",
-
-        playlist:""
-
-      });
-
-      renderRows();
-
-      renderStations();
-
-    }
-  );
-
-
-$("saveBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const ok =
-        save();
-
-      renderStations();
-
-      $("saveBtn")
-        .textContent =
-        ok
-          ? "Saved"
-          : "Save nahi hua";
-
-      setTimeout(
-        () =>
-          $("saveBtn")
-            .textContent =
-            "Save stations",
-        1600
-      );
-
-    }
-  );
-
-
-$("copyBtn")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const code =
-        "const DEFAULT_STATIONS = " +
-        JSON.stringify(
-          stations,
-          null,
-          2
-        ) +
-        ";";
-
-      const box =
-        $("exportBox");
-
-      box.hidden =
-        false;
-
-      box.value =
-        code;
-
-      box.select();
-
-      try{
-
-        await navigator.clipboard
-          .writeText(code);
-
-        $("copyBtn")
-          .textContent =
-          "Copied";
-
-      }catch(e){
-
-        $("copyBtn")
-          .textContent =
-          "Neeche se copy karo";
-
-      }
-
-      setTimeout(
-        () =>
-          $("copyBtn")
-            .textContent =
-            "Copy config",
-        2000
-      );
-
-    }
-  );
-
-
-$("resetBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      stations =
-        DEFAULT_STATIONS.map(
-          s => ({...s})
-        );
-
-      save();
-
-      renderRows();
-
-      renderStations();
-
-    }
-  );
-
-
-$("themeBtn")
-  .addEventListener(
-    "click",
-    () => {
-
-      const now =
-        document.documentElement
-          .getAttribute(
-            "data-theme"
-          );
-
-      const dark =
-        now
-          ? now === "dark"
-          : matchMedia(
-              "(prefers-color-scheme: dark)"
-            ).matches;
-
-      document.documentElement
-        .setAttribute(
-          "data-theme",
-          dark
-            ? "light"
-            : "dark"
-        );
-
-      try{
-
-        localStorage.setItem(
-          "raagbox.theme",
-          dark
-            ? "light"
-            : "dark"
-        );
-
-      }catch(e){}
-
-    }
-  );
-
-
+$("playBtn").addEventListener("click", () => {
+  if($("player").hidden){ const first = stations.findIndex(s => playlistId(s.playlist)); if(first > -1) tune(first); return; }
+  cmd(playing ? "pauseVideo" : "playVideo");
+  playing = !playing; setPlayIcon();
+});
+$("nextBtn").addEventListener("click", () => cmd("nextVideo"));
+$("prevBtn").addEventListener("click", () => cmd("previousVideo"));
+$("shuffleBtn").addEventListener("click", () => { cmd("setShuffle",[true]); cmd("nextVideo"); });
+$("vol").addEventListener("input", e => cmd("setVolume",[Number(e.target.value)]));
+
+$("ownerBtn").addEventListener("click", () => {
+  const open = $("panel").hidden;
+  $("panel").hidden = !open;
+  $("ownerBtn").setAttribute("aria-expanded", String(open));
+  if(open){ renderRows(); $("panel").scrollIntoView({behavior:"smooth", block:"start"}); }
+});
+$("addRow").addEventListener("click", () => {
+  stations.push({en:"New station", hi:"", color:"#F2A93B", playlist:""});
+  renderRows(); renderStations();
+});
+$("saveBtn").addEventListener("click", () => {
+  const ok = save();
+  renderStations();
+  $("saveBtn").textContent = ok ? "Saved" : "Save nahi hua";
+  setTimeout(() => $("saveBtn").textContent = "Save stations", 1600);
+});
+$("copyBtn").addEventListener("click", async () => {
+  const code = "const DEFAULT_STATIONS = " + JSON.stringify(stations, null, 2) + ";";
+  const box = $("exportBox");
+  box.hidden = false; box.value = code; box.select();
+  try{ await navigator.clipboard.writeText(code); $("copyBtn").textContent = "Copied"; }
+  catch(e){ $("copyBtn").textContent = "Neeche se copy karo"; }
+  setTimeout(() => $("copyBtn").textContent = "Copy config", 2000);
+});
+$("resetBtn").addEventListener("click", () => {
+  stations = DEFAULT_STATIONS.map(s => ({...s}));
+  save(); renderRows(); renderStations();
+});
+
+$("themeBtn").addEventListener("click", () => {
+  const now = document.documentElement.getAttribute("data-theme");
+  const dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+  try{ localStorage.setItem("raagbox.theme", dark ? "light" : "dark"); }catch(e){}
+});
 try{
-
-  const t =
-    localStorage.getItem(
-      "raagbox.theme"
-    );
-
-  if(t){
-
-    document.documentElement
-      .setAttribute(
-        "data-theme",
-        t
-      );
-
-  }
-
+  const t = localStorage.getItem("raagbox.theme");
+  if(t) document.documentElement.setAttribute("data-theme", t);
 }catch(e){}
 
+document.addEventListener("keydown", e => {
+  if(/input|textarea/i.test(e.target.tagName)) return;
+  if(e.code === "Space"){ e.preventDefault(); $("playBtn").click(); }
+  if(e.code === "ArrowRight") $("nextBtn").click();
+  if(e.code === "ArrowLeft") $("prevBtn").click();
+});
 
-/* ---------- keyboard ---------- */
+/* ============================================================
+   Wallpapers — har baar site khulne par ek naya scene banta hai.
+   Sab kuch code se draw hota hai, koi image file nahi.
+   ============================================================ */
+const R = (a,b) => a + Math.random() * (b - a);
+const RI = (a,b) => Math.floor(R(a, b + 1));
+const pick = arr => arr[RI(0, arr.length - 1)];
 
-document.addEventListener(
-  "keydown",
-  e => {
-
-    if(
-      /input|textarea/i.test(
-        e.target.tagName
-      )
-    )
-      return;
-
-    if(
-      e.code === "Space"
-    ){
-
-      e.preventDefault();
-
-      $("playBtn").click();
-
-    }
-
-    if(
-      e.code === "ArrowRight"
-    )
-      $("nextBtn").click();
-
-    if(
-      e.code === "ArrowLeft"
-    )
-      $("prevBtn").click();
-
+function sky(id, stops){
+  return '<linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1">' +
+    stops.map((c,i) => '<stop offset="'+(i/(stops.length-1)*100)+'%" stop-color="'+c+'"/>').join("") +
+    '</linearGradient>';
+}
+function stars(n, maxY){
+  let s = "";
+  for(let i=0;i<n;i++){
+    s += '<circle cx="'+R(0,1600).toFixed(0)+'" cy="'+R(0,maxY).toFixed(0)+'" r="'+R(.7,2.1).toFixed(1)+
+         '" fill="#fff" opacity="'+R(.25,.9).toFixed(2)+'"/>';
   }
-);
+  return s;
+}
+function ridge(y, amp, color, seedStep){
+  let d = "M0 900 L0 " + y;
+  for(let x=0; x<=1600; x+=seedStep){
+    d += " Q" + (x + seedStep/2) + " " + (y + R(-amp, amp)).toFixed(0) + " " + (x + seedStep) + " " + (y + R(-amp/2, amp/2)).toFixed(0);
+  }
+  d += " L1600 900 Z";
+  return '<path d="'+d+'" fill="'+color+'"/>';
+}
 
+const SCENES = [
+  /* highway at golden hour */
+  () => {
+    const h = RI(8, 34);
+    const top = 'hsl('+h+',78%,'+RI(22,32)+'%)', mid = 'hsl('+(h+18)+',88%,'+RI(52,62)+'%)', low = 'hsl('+(h+34)+',90%,72%)';
+    const sunY = RI(430, 540);
+    let s = '<defs>'+sky("g",[top,mid,low])+'</defs><rect width="1600" height="900" fill="url(#g)"/>';
+    s += '<circle cx="'+RI(500,1100)+'" cy="'+sunY+'" r="'+RI(90,140)+'" fill="#FFE7A8" opacity=".92"/>';
+    s += ridge(520, 60, 'hsl('+(h-6)+',40%,34%)', 320);
+    s += ridge(600, 40, 'hsl('+(h-10)+',38%,24%)', 260);
+    s += '<path d="M0 900 L640 610 L960 610 L1600 900 Z" fill="#14192B"/>';
+    for(let i=0;i<7;i++){
+      const t = i/7, y = 900 - t*t*290;
+      s += '<rect x="'+(800 - (12 + (1-t)*18)/2)+'" y="'+y+'" width="'+(12 + (1-t)*18)+'" height="'+(34*(1-t*.75))+'" fill="#F2D06B" opacity="'+(0.95 - t*0.5).toFixed(2)+'"/>';
+    }
+    return s;
+  },
+  /* night sky over dunes */
+  () => {
+    const h = RI(210, 255);
+    let s = '<defs>'+sky("g",['hsl('+h+',62%,10%)','hsl('+(h-14)+',54%,20%)','hsl('+(h-30)+',48%,34%)'])+'</defs>';
+    s += '<rect width="1600" height="900" fill="url(#g)"/>' + stars(RI(90,150), 560);
+    s += '<circle cx="'+RI(200,1400)+'" cy="'+RI(120,240)+'" r="'+RI(44,72)+'" fill="#F3EEDC" opacity=".9"/>';
+    s += ridge(560, 55, 'hsl('+(h-20)+',40%,22%)', 400);
+    s += ridge(660, 45, 'hsl('+(h-26)+',38%,15%)', 340);
+    s += ridge(760, 35, 'hsl('+(h-30)+',36%,9%)', 300);
+    return s;
+  },
+  /* truck-art arcs and chevrons */
+  () => {
+    const base = pick(['#16213E','#1B2B1F','#3A1327','#123033']);
+    const cols = ['#F2A93B','#E0457B','#1F7A5C','#F6EDDD','#2E7FA8','#C9482A'];
+    let s = '<rect width="1600" height="900" fill="'+base+'"/>';
+    const cx = RI(500,1100), cy = RI(380,540);
+    for(let r=520; r>60; r-=RI(34,58)){
+      s += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+pick(cols)+'" stroke-width="'+RI(5,16)+'" opacity="'+R(.35,.85).toFixed(2)+'"/>';
+    }
+    for(let x=-40; x<1700; x+=80){
+      s += '<path d="M'+x+' 900 l40 -58 l40 58 Z" fill="'+pick(cols)+'" opacity=".8"/>';
+    }
+    for(let i=0;i<RI(5,9);i++){
+      s += '<circle cx="'+RI(60,1540)+'" cy="'+RI(60,300)+'" r="'+RI(10,26)+'" fill="'+pick(cols)+'" opacity=".55"/>';
+    }
+    return s;
+  },
+  /* monsoon fields */
+  () => {
+    const h = RI(160, 200);
+    let s = '<defs>'+sky("g",['hsl('+h+',26%,'+RI(30,40)+'%)','hsl('+h+',22%,55%)','hsl('+(h+40)+',30%,70%)'])+'</defs>';
+    s += '<rect width="1600" height="900" fill="url(#g)"/>';
+    for(let i=0;i<RI(6,10);i++){
+      const x = R(0,1600), y = R(80,300), w = R(180,420);
+      s += '<ellipse cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" rx="'+w.toFixed(0)+'" ry="'+(w/4).toFixed(0)+'" fill="#E8EEF2" opacity="'+R(.12,.3).toFixed(2)+'"/>';
+    }
+    s += ridge(600, 30, 'hsl(120,32%,30%)', 400);
+    s += '<rect y="660" width="1600" height="240" fill="hsl(100,40%,26%)"/>';
+    for(let i=0;i<RI(70,120);i++){
+      const x = R(0,1600), y = R(0,900);
+      s += '<line x1="'+x.toFixed(0)+'" y1="'+y.toFixed(0)+'" x2="'+(x-10).toFixed(0)+'" y2="'+(y+38).toFixed(0)+'" stroke="#DCE9F2" stroke-width="1.6" opacity="'+R(.15,.45).toFixed(2)+'"/>';
+    }
+    return s;
+  },
+  /* dusk skyline */
+  () => {
+    const h = RI(268, 320);
+    let s = '<defs>'+sky("g",['hsl('+h+',52%,16%)','hsl('+(h-40)+',62%,36%)','hsl('+(h-70)+',86%,62%)'])+'</defs>';
+    s += '<rect width="1600" height="900" fill="url(#g)"/>' + stars(RI(40,80), 320);
+    let x = -20;
+    while(x < 1640){
+      const w = RI(60,140), hgt = RI(120,400);
+      s += '<rect x="'+x+'" y="'+(900-hgt)+'" width="'+w+'" height="'+hgt+'" fill="#0E1326" opacity=".93"/>';
+      for(let wy = 900-hgt+18; wy < 880; wy += 34){
+        for(let wx = x+12; wx < x+w-12; wx += 26){
+          if(Math.random() > .55) s += '<rect x="'+wx+'" y="'+wy+'" width="10" height="14" fill="#F4C56A" opacity="'+R(.4,.95).toFixed(2)+'"/>';
+        }
+      }
+      x += w + RI(6,22);
+    }
+    return s;
+  },
+  /* cassette-tape waveform */
+  () => {
+    const base = pick(['#101A33','#1E1233','#0F2A2A','#2A1020']);
+    const glow = pick(['#F2A93B','#E0457B','#2E7FA8','#1F7A5C']);
+    let s = '<rect width="1600" height="900" fill="'+base+'"/>';
+    for(let band=0; band<RI(3,5); band++){
+      const mid = 200 + band * RI(140,190);
+      let d = "M0 " + mid;
+      for(let x=0; x<=1600; x+=40) d += " L" + x + " " + (mid + Math.sin(x/R(90,210) + band) * R(20,70)).toFixed(0);
+      s += '<path d="'+d+'" fill="none" stroke="'+glow+'" stroke-width="'+RI(2,5)+'" opacity="'+R(.25,.7).toFixed(2)+'"/>';
+    }
+    for(let i=0;i<120;i++){
+      const x = i*13+6, hgt = Math.abs(Math.sin(i/R(4,9))) * R(40,260);
+      s += '<rect x="'+x+'" y="'+(900-hgt).toFixed(0)+'" width="6" height="'+hgt.toFixed(0)+'" fill="'+glow+'" opacity="'+R(.15,.5).toFixed(2)+'"/>';
+    }
+    return s;
+  }
+];
 
-/* ---------- startup ---------- */
+function paintWall(){
+  const svg = '<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">' +
+              pick(SCENES)() + '</svg>';
+  $("wall").innerHTML = svg;
+}
 
-stations =
-  load();
-
+stations = load();
 renderStations();
-
 setPlayIcon();
-
+paintWall();
 </script>
-
 </body>
 </html>
