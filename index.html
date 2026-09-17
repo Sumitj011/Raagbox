@@ -138,6 +138,12 @@
     width:42px;height:42px;border-radius:50%;border:1.5px solid rgba(246,237,221,.35);background:rgba(255,255,255,.08);
     color:#F6EDDD;display:grid;place-items:center;flex:none
   }
+  #shuffleBtn.active{
+  background: rgba(242,169,59,.22);
+  border-color: rgba(242,169,59,.75);
+  color: #F2A93B;
+  box-shadow: 0 0 0 2px rgba(242,169,59,.12);
+}
   .rnd:hover{background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
   .rnd.big{width:52px;height:52px;background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
   .rnd.big:hover{background:var(--rani);color:#fff;border-color:var(--rani)}
@@ -396,9 +402,11 @@ window.addEventListener("message", e => {
   }
 
   if(d && d.event === "onReady"){
-    cmd("setShuffle",[true]);
-    cmd("setVolume",[Number($("vol").value)]);
-  }
+  shuffleEnabled = true;
+  cmd("setShuffle", [true]);
+  updateShuffleButton();
+  cmd("setVolume",[Number($("vol").value)]);
+}
 
   if(d && d.info && d.info.videoData){
     const title = (d.info.videoData.title || "").trim();
@@ -460,7 +468,10 @@ function tune(i){
           "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
   playing = true; setPlayIcon(); setMediaSessionState("playing");
   startHandshake();
-  setTimeout(() => cmd("setShuffle",[true]), 1800);
+  setTimeout(() => {
+  cmd("setShuffle", [shuffleEnabled]);
+  updateShuffleButton();
+}, 1800);  
 }
 
 /* ---------- stations UI ---------- */
@@ -519,7 +530,20 @@ $("playBtn").addEventListener("click", () => {
 });
 $("nextBtn").addEventListener("click", () => cmd("nextVideo"));
 $("prevBtn").addEventListener("click", () => cmd("previousVideo"));
-$("shuffleBtn").addEventListener("click", () => { cmd("setShuffle",[true]); cmd("nextVideo"); });
+let shuffleEnabled = false;
+
+function updateShuffleButton(){
+  const btn = $("shuffleBtn");
+  btn.classList.toggle("active", shuffleEnabled);
+  btn.setAttribute("aria-pressed", shuffleEnabled ? "true" : "false");
+}
+
+$("shuffleBtn").addEventListener("click", () => {
+  shuffleEnabled = !shuffleEnabled;
+
+  cmd("setShuffle", shuffleEnabled);
+  updateShuffleButton();
+});
 $("vol").addEventListener("input", e => cmd("setVolume",[Number(e.target.value)]));
 
 function openPanel(){
