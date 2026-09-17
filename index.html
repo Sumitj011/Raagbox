@@ -83,6 +83,19 @@
       linear-gradient(to top, rgba(6,10,22,.86) 0%, rgba(6,10,22,.32) 20%, rgba(6,10,22,0) 42%, rgba(6,10,22,0) 62%, rgba(6,10,22,.55) 100%),
       linear-gradient(to bottom, rgba(6,10,22,.5) 0%, rgba(6,10,22,0) 22%);
   }
+  .station-tint{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  opacity:.12;
+  mix-blend-mode:soft-light;
+  background:var(--station-color,#F2A93B);
+}
+
+:root[data-theater="on"] .station-tint{
+  opacity:0;
+}
 
   /* ---------- floating HUD ---------- */
   .hud-top{
@@ -186,8 +199,7 @@
   box-shadow:
     0 0 8px rgba(242,169,59,.55),
     0 0 22px rgba(242,169,59,.22);
-} 
- :root[data-theater="on"] .stage iframe{
+}:root[data-theater="on"] .stage iframe{
   opacity:0;
   pointer-events:none;
 }
@@ -197,6 +209,41 @@
   .nowbox{flex:1 1 100px;min-width:0;color:#F6EDDD}
   .nowbox .label{font-size:10.5px;letter-spacing:.06em;color:#B9C0DE}
   .nowbox .name{font-family:"Yatra One",cursive;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .visualizer{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:3px;
+  width:28px;
+  height:24px;
+  flex:none;
+  opacity:.45;
+}
+
+.visualizer i{
+  width:3px;
+  height:6px;
+  border-radius:3px;
+  background:var(--marigold);
+}
+
+.visualizer.playing i{
+  animation:visualize .8s ease-in-out infinite alternate;
+}
+
+.visualizer.playing i:nth-child(2){animation-delay:.12s}
+.visualizer.playing i:nth-child(3){animation-delay:.24s}
+.visualizer.playing i:nth-child(4){animation-delay:.08s}
+.visualizer.playing i:nth-child(5){animation-delay:.18s}
+
+@keyframes visualize{
+  from{height:4px}
+  to{height:22px}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .visualizer.playing i{animation:none;height:10px}
+}
   .vol{display:none;align-items:center;gap:6px;flex:0 1 110px;color:#F6EDDD}
   .vol input{width:100%;accent-color:var(--rani)}
   @media (min-width:640px){ .vol{display:flex} }
@@ -218,6 +265,48 @@
   .hint{color:#A8B2D1;font-size:13.5px;margin:0}
 
   .stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .recent-stations{
+  margin:0 0 14px;
+  color:#B9C0DE;
+  font-size:13px;
+}
+
+.recent-stations strong{
+  display:block;
+  color:#F6EDDD;
+  margin-bottom:5px;
+}
+  .station-item{
+  position:relative;
+}
+
+.station-item .plate{
+  width:100%;
+  padding-right:46px;
+}
+
+.favorite-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:2;
+  width:30px;
+  height:30px;
+  border:0;
+  border-radius:50%;
+  background:rgba(8,13,28,.45);
+  color:#F6EDDD;
+  font-size:20px;
+  line-height:1;
+  display:grid;
+  place-items:center;
+}
+
+.favorite-btn:hover,
+.favorite-btn.active{
+  color:#E0457B;
+  background:rgba(224,69,123,.16);
+}
   .plate{
     position:relative;text-align:left;background:rgba(255,255,255,.06);border:1.5px solid rgba(246,237,221,.18);
     border-radius:16px;padding:14px 14px 12px;transition:transform .12s ease,border-color .12s ease;color:#F6EDDD
@@ -262,6 +351,106 @@
     .row input[type="text"]:nth-child(3){grid-column:1 / -1}
   }
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .sleep-menu{
+  position:fixed;
+  right:18px;
+  bottom:90px;
+  z-index:30;
+  background:rgba(12,18,38,.96);
+  border:1px solid rgba(246,237,221,.2);
+  border-radius:16px;
+  padding:10px;
+  box-shadow:0 15px 40px rgba(0,0,0,.5);
+}
+.sleep-menu[hidden]{display:none}
+.sleep-menu button{
+  display:block;
+  width:150px;
+  border:0;
+  background:transparent;
+  color:#F6EDDD;
+  text-align:left;
+  padding:8px 10px;
+  border-radius:8px;
+}
+.sleep-menu button:hover{
+  background:rgba(242,169,59,.2);
+}
+.lyrics-panel{
+  position:fixed;
+  inset:0;
+  z-index:25;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);
+}
+
+.lyrics-panel[hidden]{display:none}
+
+.lyrics-card{
+  position:relative;
+  width:min(720px,94vw);
+  max-height:82dvh;
+  overflow:auto;
+  padding:30px;
+  border-radius:22px;
+  background:rgba(12,18,38,.96);
+  color:#F6EDDD;
+  box-shadow:0 30px 80px rgba(0,0,0,.65);
+}
+
+.lyrics-card h2{
+  margin-bottom:2px;
+}
+
+#lyricsArtist{
+  color:#A8B2D1;
+  margin-bottom:22px;
+}
+
+#lyricsText{
+  white-space:pre-wrap;
+  line-height:1.9;
+  font-size:17px;
+}
+
+.lyrics-close{
+  position:absolute;
+  top:10px;
+  right:14px;
+  border:0;
+  background:transparent;
+  color:#F6EDDD;
+  font-size:28px;
+}
+
+.lyrics-btn{
+  pointer-events:auto;
+  cursor:pointer;
+  margin-top:12px;
+  border:1px solid rgba(246,237,221,.3);
+  background:rgba(8,13,28,.45);
+  color:#F6EDDD;
+  border-radius:999px;
+  padding:5px 13px;
+}
+#nowCard.station-change{
+  animation:stationChange .35s ease;
+}
+
+@keyframes stationChange{
+  0%{
+    opacity:0;
+    transform:translateX(-50%) translateY(8px);
+  }
+  100%{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+}
 </style>
 </head>
 <body>
@@ -270,6 +459,7 @@
   <iframe id="player" title="RaagBox player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
   <div id="wall" aria-hidden="true"></div>
   <div class="scrim" aria-hidden="true"></div>
+  <div class="station-tint" id="stationTint" aria-hidden="true"></div>
 
   <header class="hud-top">
     <div class="brand-mini">
@@ -290,11 +480,12 @@
     </div>
   </header>
 
-  <div id="nowCard" hidden>
-    <div id="nowTitle">RaagBox</div>
-    <div id="nowMeta"></div>
-    <div id="nowQuote"></div>
-  </div>
+ <div id="nowCard" hidden>
+  <div id="nowTitle">RaagBox</div>
+  <div id="nowMeta"></div>
+  <div id="nowQuote"></div>
+  <button class="lyrics-btn" id="lyricsBtn">Lyrics</button>
+</div>
 
   <div class="empty" id="empty" hidden>
     <strong>Koi station on air nahi hai</strong>
@@ -305,14 +496,28 @@
     <button class="rnd" id="prevBtn" title="Pichla gaana"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zm12 0v14l-9-7z"/></svg><span class="sr">Previous</span></button>
     <button class="rnd big" id="playBtn" title="Play / pause"><svg id="playIcon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg><span class="sr">Play or pause</span></button>
     <button class="rnd" id="nextBtn" title="Agla gaana"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM6 5l9 7-9 7z"/></svg><span class="sr">Next</span></button>
-    <button class="rnd" id="shuffleBtn" title="Dobara shuffle karo"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3l4 4-4 4V8h-2.2l-2.3 3-1.3-1.7L13.6 6H17V3zM3 6h4.4l8.4 11H17v-3l4 4-4 4v-3h-2.2L6.4 8H3V6zm0 11h3.4l2.3-3 1.3 1.7L7.4 19H3v-2z"/></svg><span class="sr">Reshuffle</span></button>
-    <div class="nowbox">
+    <button class="rnd" id="shuffleBtn" title="Shuffle ON/OFF" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3l4 4-4 4V8h-2.2l-2.3 3-1.3-1.7L13.6 6H17V3zM3 6h4.4l8.4 11H17v-3l4 4-4 4v-3h-2.2L6.4 8H3V6zm0 11h3.4l2.3-3 1.3 1.7L7.4 19H3v-2z"/></svg><span class="sr">Reshuffle</span></button>
+    <div class="visualizer" id="visualizer" aria-hidden="true">
+	<i></i><i></i><i></i><i></i><i></i>
+	</div>
+	<div class="nowbox">
       <div class="label">On air</div>
       <div class="name" id="nowName">—</div>
     </div>
     <div class="vol">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9h3l5-4v14l-5-4H4zm12.5 3a3.5 3.5 0 0 0-2-3.2v6.4a3.5 3.5 0 0 0 2-3.2z"/></svg>
-      <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume">
+       <input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume">
+</div>
+
+<button class="rnd" id="lyricsPlayerBtn" title="Lyrics">♪</button>
+<button class="rnd" id="sleepBtn" title="Sleep timer">🌙</button>
+
+<div class="sleep-menu" id="sleepMenu" hidden>
+  <button data-minutes="0">Off</button>
+  <button data-minutes="15">15 minutes</button>
+  <button data-minutes="30">30 minutes</button>
+  <button data-minutes="45">45 minutes</button>
+  <button data-minutes="60">60 minutes</button>
+</div>
     </div>
   </div>
 
@@ -321,8 +526,9 @@
     <div class="drawer-handle"></div>
     <div class="sechead">
       <h2>Stations</h2>
-      <p class="hint">Shuffle hoke chalta hai — gaane repeat nahi honge jab tak poori list khatam na ho.</p>
+      <p class="hint">Shuffle ON karo to gaane random order mein chalenge.</p>
     </div>
+	<div id="recentStations" class="recent-stations"></div>
     <div class="stations" id="stations"></div>
     <p class="drawer-credit">RaagBox — gaane YouTube se chalte hain. Koi signup nahi.</p>
   </section>
@@ -343,7 +549,15 @@
       </div>
       <textarea id="exportBox" hidden readonly aria-label="Station config"></textarea>
     </div>
-  </section>
+</section>
+<section class="lyrics-panel" id="lyricsPanel" hidden>
+  <div class="lyrics-card">
+    <button class="lyrics-close" id="lyricsClose">×</button>
+    <h2 id="lyricsTitle">Lyrics</h2>
+    <div id="lyricsArtist"></div>
+    <div id="lyricsText"></div>
+  </div>
+</section>
 </div>
 
 <script>
@@ -362,6 +576,63 @@ const DEFAULT_STATIONS = [
 ];
 
 const KEY = "raagbox.stations.v1";
+const FAVORITES_KEY = "raagbox.favorites.v1";
+let favorites = [];
+const RECENT_KEY = "raagbox.recent.v1";
+let recentStations = [];
+
+try{
+  const rawRecent = localStorage.getItem(RECENT_KEY);
+  if(rawRecent){
+    const parsedRecent = JSON.parse(rawRecent);
+    if(Array.isArray(parsedRecent)) recentStations = parsedRecent;
+  }
+}catch(e){}
+
+function rememberRecent(s){
+  const key = stationKey(s);
+
+  recentStations = [
+    key,
+    ...recentStations.filter(x => x !== key)
+  ].slice(0,5);
+
+  try{
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recentStations));
+  }catch(e){}
+}
+
+try{
+  const rawFavorites = localStorage.getItem(FAVORITES_KEY);
+  if(rawFavorites){
+    const parsedFavorites = JSON.parse(rawFavorites);
+    if(Array.isArray(parsedFavorites)) favorites = parsedFavorites;
+  }
+}catch(e){}
+
+function stationKey(s){
+  return playlistId(s.playlist) || ("name:" + (s.en || ""));
+}
+
+function isFavorite(s){
+  return favorites.includes(stationKey(s));
+}
+
+function toggleFavorite(s){
+  const key = stationKey(s);
+
+  if(isFavorite(s)){
+    favorites = favorites.filter(x => x !== key);
+  }else{
+    favorites.push(key);
+  }
+
+  try{
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  }catch(e){}
+
+  renderStations();
+}
 const $ = id => document.getElementById(id);
 let stations = [], current = -1, playing = false, hs = null;
 
@@ -449,8 +720,7 @@ window.addEventListener("message", e => {
   }
 
   if(d && d.event === "onReady"){
-  shuffleEnabled = true;
-  cmd("setShuffle", [true]);
+  cmd("setShuffle", [shuffleEnabled]);
   updateShuffleButton();
   cmd("setVolume",[Number($("vol").value)]);
 }
@@ -475,14 +745,125 @@ function setPlayIcon(){
   $("playIcon").innerHTML = playing
     ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
     : '<path d="M7 4l13 8-13 8z"/>';
+
+  const visualizer = $("visualizer");
+  if(visualizer){
+    visualizer.classList.toggle("playing", playing);
+  }
+}
+async function findLyrics(){
+  const title = $("nowName").textContent.trim();
+  const artist = $("nowMeta").textContent.trim();
+
+  if(!title || title === "—"){
+    return null;
+  }
+
+  try{
+    const url =
+      "https://lrclib.net/api/search?track_name=" +
+      encodeURIComponent(title) +
+      (artist
+        ? "&artist_name=" + encodeURIComponent(artist)
+        : "");
+
+    const response = await fetch(url);
+
+    if(!response.ok){
+      return null;
+    }
+
+    const results = await response.json();
+
+    if(!Array.isArray(results) || !results.length){
+      return null;
+    }
+
+    const cleanTitle = title.toLowerCase();
+    const cleanArtist = artist.toLowerCase();
+
+    const exact = results.find(item =>
+      (item.trackName || "").trim().toLowerCase() === cleanTitle &&
+      (!cleanArtist ||
+       (item.artistName || "").trim().toLowerCase() === cleanArtist)
+    );
+
+    const titleMatch = results.find(item =>
+      (item.trackName || "").trim().toLowerCase() === cleanTitle
+    );
+
+    return exact || titleMatch || results[0] || null;
+
+  }catch(e){
+    console.error("Lyrics lookup failed:", e);
+    return null;
+  }
 }
 
+async function openLyrics(){
+  $("lyricsPanel").hidden = false;
+
+  $("lyricsTitle").textContent =
+    $("nowName").textContent || "Lyrics";
+
+  $("lyricsArtist").textContent = "";
+  $("lyricsText").textContent = "Searching lyrics...";
+
+  const data = await findLyrics();
+
+  if(!data){
+    $("lyricsText").textContent =
+      "Lyrics not found for this track.";
+    return;
+  }
+
+  $("lyricsTitle").textContent =
+    data.trackName || $("nowName").textContent || "Lyrics";
+
+  $("lyricsArtist").textContent =
+    data.artistName || "";
+
+  const lyrics =
+  data.plainLyrics ||
+  (data.syncedLyrics
+    ? data.syncedLyrics.replace(/\[\d{2}:\d{2}(?:\.\d{2,3})?\]\s*/g, "")
+    : "");
+
+if(!lyrics){
+  $("lyricsText").textContent =
+    "Lyrics are not available for this track.";
+  return;
+}
+
+  $("lyricsText").textContent = lyrics;
+}
+
+function closeLyrics(){
+  $("lyricsPanel").hidden = true;
+}
+
+$("lyricsBtn").addEventListener("click", openLyrics);
+$("lyricsPlayerBtn").addEventListener("click", openLyrics);
+$("lyricsClose").addEventListener("click", closeLyrics);
+
+$("lyricsPanel").addEventListener("click", e => {
+  if(e.target === $("lyricsPanel")){
+    closeLyrics();
+  }
+});
 /* ---------- tuning ---------- */
 function tune(i){
   const st = stations[i];
-  if(!st) return;
-  const id = playlistId(st.playlist);
+if(!st) return;
+
+$("stationTint").style.setProperty(
+  "--station-color",
+  st.color || "#F2A93B"
+);
+
+const id = playlistId(st.playlist);
   current = i;
+  rememberRecent(st);
   renderStations();
   $("nowName").textContent = st.en;
   $("nowTitle").textContent = st.en;
@@ -496,6 +877,9 @@ function tune(i){
     "Kuch pal yaad nahi rehte, bas unka soundtrack reh jaata hai."
    ]);
   $("nowCard").hidden = false;
+  $("nowCard").classList.remove("station-change");
+  void $("nowCard").offsetWidth;
+  $("nowCard").classList.add("station-change");
   updateMediaSession(st.en, st.hi);
   if(!id){
     $("nowCard").hidden = true;
@@ -525,22 +909,72 @@ function tune(i){
 function renderStations(){
   const box = $("stations");
   box.innerHTML = "";
+
   stations.forEach((s, i) => {
+    const wrap = document.createElement("div");
+    wrap.className = "station-item";
+
     const b = document.createElement("button");
     b.className = "plate";
     b.style.setProperty("--accent", s.color || "#F2A93B");
     b.setAttribute("aria-pressed", i === current ? "true" : "false");
-    b.innerHTML = '<span class="dot"></span>' +
+
+    b.innerHTML =
+      '<span class="dot"></span>' +
       '<span class="bars"><i></i><i></i><i></i></span>' +
       '<div class="en"></div><div class="hi"></div>' +
       (playlistId(s.playlist) ? "" : '<div class="off">playlist baaki hai</div>');
+
     b.querySelector(".en").textContent = s.en || "Untitled";
     b.querySelector(".hi").textContent = s.hi || "";
-    b.addEventListener("click", () => { tune(i); closeDrawer(); });
-    box.appendChild(b);
-  });
-}
 
+    b.addEventListener("click", () => {
+      tune(i);
+      closeDrawer();
+    });
+
+    const fav = document.createElement("button");
+    fav.className = "favorite-btn";
+    fav.textContent = isFavorite(s) ? "♥" : "♡";
+    fav.title = isFavorite(s) ? "Remove from favorites" : "Add to favorites";
+    fav.setAttribute("aria-label", fav.title);
+
+    if(isFavorite(s)){
+      fav.classList.add("active");
+    }
+
+    fav.addEventListener("click", e => {
+      e.stopPropagation();
+      toggleFavorite(s);
+    });
+
+    wrap.appendChild(b);
+    wrap.appendChild(fav);
+    box.appendChild(wrap);
+  });
+
+  renderRecentStations();
+}
+function renderRecentStations(){
+  const box = $("recentStations");
+  if(!box) return;
+
+  const names = recentStations
+    .map(key => {
+      const s = stations.find(station => stationKey(station) === key);
+      return s?.en;
+    })
+    .filter(Boolean);
+
+  if(!names.length){
+    box.innerHTML = "";
+    return;
+  }
+
+  box.innerHTML =
+    "<strong>Recently played</strong>" +
+    names.map(name => "• " + name).join(" &nbsp; ");
+}
 /* ---------- owner panel ---------- */
 function renderRows(){
   const box = $("rows");
@@ -581,8 +1015,10 @@ let shuffleEnabled = false;
 
 function updateShuffleButton(){
   const btn = $("shuffleBtn");
+
   btn.classList.toggle("active", shuffleEnabled);
   btn.setAttribute("aria-pressed", shuffleEnabled ? "true" : "false");
+  btn.title = shuffleEnabled ? "Shuffle ON" : "Shuffle OFF";
 }
 
 $("shuffleBtn").addEventListener("click", () => {
@@ -592,6 +1028,37 @@ $("shuffleBtn").addEventListener("click", () => {
   updateShuffleButton();
 });
 $("vol").addEventListener("input", e => cmd("setVolume",[Number(e.target.value)]));
+let sleepTimer = null;
+
+$("sleepBtn").addEventListener("click", () => {
+  $("sleepMenu").hidden = !$("sleepMenu").hidden;
+});
+
+$("sleepMenu").addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if(!btn) return;
+
+  const minutes = Number(btn.dataset.minutes);
+
+  clearTimeout(sleepTimer);
+  sleepTimer = null;
+
+  if(minutes > 0){
+    sleepTimer = setTimeout(() => {
+      cmd("pauseVideo");
+      playing = false;
+      setPlayIcon();
+      setMediaSessionState("paused");
+      $("sleepBtn").textContent = "🌙";
+    }, minutes * 60 * 1000);
+
+    $("sleepBtn").textContent = "🌙 " + minutes + "m";
+  }else{
+    $("sleepBtn").textContent = "🌙";
+  }
+
+  $("sleepMenu").hidden = true;
+});
 
 function openPanel(){
   $("panel").hidden = false;
