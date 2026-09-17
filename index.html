@@ -143,6 +143,49 @@
   border-color: rgba(242,169,59,.75);
   color: #F2A93B;
   box-shadow: 0 0 0 2px rgba(242,169,59,.12);
+}/* ---------- theater mode ---------- */
+:root[data-theater="on"] body{
+  background:#000;
+}
+
+:root[data-theater="on"] .stage{
+  background:#000;
+}
+
+:root[data-theater="on"] #wall,
+:root[data-theater="on"] .scrim{
+  opacity:0;
+}
+
+:root[data-theater="on"] .chip,
+:root[data-theater="on"] .rnd{
+  border-color:rgba(242,169,59,.8);
+  box-shadow:
+    0 0 8px rgba(242,169,59,.45),
+    0 0 20px rgba(242,169,59,.18);
+}
+
+:root[data-theater="on"] .rnd.big{
+  background:#000;
+  color:#F2A93B;
+}
+
+:root[data-theater="on"] .brand-mini,
+:root[data-theater="on"] #nowCard,
+:root[data-theater="on"] .player-bar{
+  filter:drop-shadow(0 0 8px rgba(242,169,59,.18));
+}
+
+:root[data-theater="on"] .nowbox{
+  color:#F6EDDD;
+}
+
+:root[data-theater="on"] #themeBtn{
+  color:#F2A93B;
+  border-color:#F2A93B;
+  box-shadow:
+    0 0 8px rgba(242,169,59,.55),
+    0 0 22px rgba(242,169,59,.22);
 }
   .rnd:hover{background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
   .rnd.big{width:52px;height:52px;background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
@@ -594,16 +637,34 @@ $("resetBtn").addEventListener("click", () => {
   save(); renderRows(); renderStations();
 });
 
+function updateThemeButton(){
+  const theater = document.documentElement.getAttribute("data-theater") === "on";
+  $("themeBtn").textContent = theater ? "☀ Normal" : "◐ Theater";
+  $("themeBtn").setAttribute("aria-pressed", theater ? "true" : "false");
+}
+
 $("themeBtn").addEventListener("click", () => {
-  const now = document.documentElement.getAttribute("data-theme");
-  const dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-  document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
-  try{ localStorage.setItem("raagbox.theme", dark ? "light" : "dark"); }catch(e){}
+  const root = document.documentElement;
+  const theater = root.getAttribute("data-theater") === "on";
+  const next = theater ? "off" : "on";
+
+  root.setAttribute("data-theater", next);
+
+  try{
+    localStorage.setItem("raagbox.theater", next);
+  }catch(e){}
+
+  updateThemeButton();
 });
+
 try{
-  const t = localStorage.getItem("raagbox.theme");
-  if(t) document.documentElement.setAttribute("data-theme", t);
+  const t = localStorage.getItem("raagbox.theater");
+  if(t === "on"){
+    document.documentElement.setAttribute("data-theater", "on");
+  }
 }catch(e){}
+
+updateThemeButton();
 
 document.addEventListener("keydown", e => {
   if(/input|textarea/i.test(e.target.tagName)) return;
