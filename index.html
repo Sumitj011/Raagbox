@@ -754,6 +754,8 @@ function setPlayIcon(){
 async function findLyrics(){
   const title = $("nowName").textContent.trim();
   const artist = $("nowMeta").textContent.trim();
+  console.log("Lyrics title:", title);
+  console.log("Lyrics artist:", artist);
 
   if(!title || title === "—"){
     return null;
@@ -768,6 +770,8 @@ async function findLyrics(){
         : "");
 
     const response = await fetch(url);
+	console.log("Lyrics URL:", url);
+    console.log("Lyrics status:", response.status);
 
     if(!response.ok){
       return null;
