@@ -752,51 +752,100 @@ function setPlayIcon(){
   }
 }
 async function findLyrics(){
-  const title = $("nowName").textContent.trim();
-  const artist = $("nowMeta").textContent.trim();
-  console.log("Lyrics title:", title);
-  console.log("Lyrics artist:", artist);
+  const rawTitle = $("nowName").textContent.trim();
 
-  if(!title || title === "—"){
+  if(!rawTitle || rawTitle === "—"){
     return null;
   }
 
+  function cleanText(text){
+    return text
+      .replace(/\[[^\]]*\]/g, "")
+      .replace(/\([^)]*\b(HD|HQ|4K|1080p|720p|official|video|audio|lyrics)\b[^)]*\)/gi, "")
+      .replace(/\b(HD|HQ|4K|1080p|720p|official|video|audio|lyrics)\b/gi, "")
+      .replace(/\s+/g, " ")
+      .replace(/^[\s\-|:]+|[\s\-|:]+$/g, "")
+      .trim();
+  }
+
+  function titleCandidates(raw){
+    const candidates = [];
+
+    const add = value => {
+      const cleaned = cleanText(value);
+      if(cleaned && !candidates.includes(cleaned)){
+        candidates.push(cleaned);
+      }
+    };
+
+    // Full title
+    add(raw);
+
+    // Remove common YouTube separators/content after them
+    raw.split("|").forEach(part => add(part));
+
+    raw.split(" - ").forEach(part => add(part));
+
+    // Try the first meaningful part as the actual song title
+    const firstPart = raw.split("|")[0].split(" - ")[0];
+    add(firstPart);
+
+    return candidates.slice(0, 8);
+  }
+
+  const candidates = titleCandidates(rawTitle);
+
+  console.log("Lyrics candidates:", candidates);
+
   try{
-    const url =
-      "https://lrclib.net/api/search?track_name=" +
-      encodeURIComponent(title) +
-      (artist
-        ? "&artist_name=" + encodeURIComponent(artist)
-        : "");
+    for(const candidate of candidates){
 
-    const response = await fetch(url);
-	console.log("Lyrics URL:", url);
-    console.log("Lyrics status:", response.status);
+      const url =
+        "https://lrclib.net/api/search?track_name=" +
+        encodeURIComponent(candidate);
 
-    if(!response.ok){
-      return null;
+      const response = await fetch(url);
+
+      if(!response.ok){
+        continue;
+      }
+
+      const results = await response.json();
+
+      if(!Array.isArray(results) || !results.length){
+        continue;
+      }
+
+      const candidateLower = candidate.toLowerCase();
+
+      // Exact title match
+      const exact = results.find(item =>
+        (item.trackName || "").trim().toLowerCase() === candidateLower
+      );
+
+      if(exact){
+        return exact;
+      }
+
+      // Strong partial title match
+      const partial = results.find(item => {
+        const track = (item.trackName || "").trim().toLowerCase();
+
+        return (
+          track.includes(candidateLower) ||
+          candidateLower.includes(track)
+        );
+      });
+
+      if(partial){
+        return partial;
+      }
+
+      // If this candidate produced results, use the first one
+      return results[0];
     }
 
-    const results = await response.json();
-
-    if(!Array.isArray(results) || !results.length){
-      return null;
-    }
-
-    const cleanTitle = title.toLowerCase();
-    const cleanArtist = artist.toLowerCase();
-
-    const exact = results.find(item =>
-      (item.trackName || "").trim().toLowerCase() === cleanTitle &&
-      (!cleanArtist ||
-       (item.artistName || "").trim().toLowerCase() === cleanArtist)
-    );
-
-    const titleMatch = results.find(item =>
-      (item.trackName || "").trim().toLowerCase() === cleanTitle
-    );
-
-    return exact || titleMatch || results[0] || null;
+    return null;
 
   }catch(e){
     console.error("Lyrics lookup failed:", e);
