@@ -541,7 +541,7 @@ function updateShuffleButton(){
 $("shuffleBtn").addEventListener("click", () => {
   shuffleEnabled = !shuffleEnabled;
 
-  cmd("setShuffle", shuffleEnabled);
+  cmd("setShuffle", [shuffleEnabled]);
   updateShuffleButton();
 });
 $("vol").addEventListener("input", e => cmd("setVolume",[Number(e.target.value)]));
