@@ -186,6 +186,10 @@
   box-shadow:
     0 0 8px rgba(242,169,59,.55),
     0 0 22px rgba(242,169,59,.22);
+} 
+ :root[data-theater="on"] .stage iframe{
+  opacity:0;
+  pointer-events:none;
 }
   .rnd:hover{background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
   .rnd.big{width:52px;height:52px;background:var(--marigold);color:var(--ink);border-color:var(--marigold)}
