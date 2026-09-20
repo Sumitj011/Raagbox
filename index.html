@@ -457,9 +457,14 @@
   margin:1px 0;
   text-align:center;
 
-  color:rgba(246,237,221,.38);
+  color:rgba(246,237,221,.68);
+
   font-size:18px;
   line-height:1.45;
+
+  text-shadow:
+    0 2px 8px rgba(0,0,0,.85),
+    0 0 3px rgba(0,0,0,.7);
 
   transition:
     color .3s ease,
@@ -470,15 +475,20 @@
 
 .lyric-line.active{
   color:#F6EDDD;
+
   transform:scale(1.06);
 
   text-shadow:
     0 0 8px rgba(242,169,59,.95),
-    0 0 22px rgba(242,169,59,.6);
+    0 0 22px rgba(242,169,59,.6),
+    0 2px 10px rgba(0,0,0,.9);
 }
 
 .lyric-line.plain{
-  color:rgba(246,237,221,.8);
+  color:rgba(246,237,221,.88);
+
+  text-shadow:
+    0 2px 10px rgba(0,0,0,.9);
 }
 
 .lyrics-loading,
@@ -488,18 +498,6 @@
   padding:30px 20px;
 }
 
-.lyrics-btn{
-  pointer-events:auto;
-  cursor:pointer;
-  margin-top:12px;
-
-  border:1px solid rgba(246,237,221,.3);
-  background:rgba(8,13,28,.45);
-  color:#F6EDDD;
-
-  border-radius:999px;
-  padding:5px 13px;
-}
 
 /* ---------- mobile optimization ---------- */
 
@@ -567,8 +565,6 @@
   <div class="inline-lyrics" id="lyricsPanel" hidden>
     <div class="inline-lyrics-text" id="lyricsText"></div>
   </div>
-
-  <button class="lyrics-btn" id="lyricsBtn">Lyrics</button>
 </div>
 
   <div class="empty" id="empty" hidden>
@@ -713,7 +709,7 @@ function toggleFavorite(s){
 }
 const $ = id => document.getElementById(id);
 let stations = [], current = -1, playing = false, hs = null;
-
+let lastVideoKey = "";
 /* ---------- storage ---------- */
 function load(){
   try{
@@ -803,15 +799,38 @@ window.addEventListener("message", e => {
   cmd("setVolume",[Number($("vol").value)]);
 }
 
-  if(d && d.info && d.info.videoData){
-    const title = (d.info.videoData.title || "").trim();
-    const author = (d.info.videoData.author || "").trim();
 
-    $("nowTitle").textContent = title || stations[current]?.en || "RaagBox";
-    $("nowMeta").textContent = author || stations[current]?.hi || "";
-    $("nowName").textContent = title || stations[current]?.en || "—";
-    updateMediaSession(title || stations[current]?.en, author || stations[current]?.hi);
+if(d && d.info && d.info.videoData){
+  const title = (d.info.videoData.title || "").trim();
+  const author = (d.info.videoData.author || "").trim();
+
+  const videoKey = title + "||" + author;
+  const changed = lastVideoKey && lastVideoKey !== videoKey;
+
+  lastVideoKey = videoKey;
+
+  $("nowTitle").textContent =
+    title || stations[current]?.en || "RaagBox";
+
+  $("nowMeta").textContent =
+    author || stations[current]?.hi || "";
+
+  $("nowName").textContent =
+    title || stations[current]?.en || "—";
+
+  updateMediaSession(
+    title || stations[current]?.en,
+    author || stations[current]?.hi
+  );
+
+  // Clear lyrics when YouTube moves to a new song
+  if(changed){
+    closeLyrics();
+
+    activeLyrics = [];
+    $("lyricsText").innerHTML = "";
   }
+}
 
 if(d && d.info && typeof d.info.playerState === "number"){
   playing = d.info.playerState === 1;
@@ -1245,15 +1264,6 @@ function closeLyrics(){
   stopLyricsSync();
 }
 
-$("lyricsBtn").addEventListener("click", () => {
-  const panel = $("lyricsPanel");
-
-  if(panel.hidden){
-    openLyrics();
-  }else{
-    closeLyrics();
-  }
-});
 $("lyricsPlayerBtn").addEventListener("click", () => {
   const panel = $("lyricsPanel");
 
@@ -1269,11 +1279,11 @@ function tune(i){
   const st = stations[i];
   if(!st) return;
 
-  // Reset lyrics from previous song/station
-  closeLyrics();
-  stopLyricsSync();
-  activeLyrics = [];
-  $("lyricsText").innerHTML = "";
+  
+ // Reset lyrics from previous song/station
+closeLyrics();
+activeLyrics = [];
+$("lyricsText").innerHTML = "";
 
   $("stationTint").style.setProperty(
     "--station-color",
