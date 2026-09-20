@@ -163,14 +163,20 @@
   background:#050812;
 }
 
-/* Keep wallpaper visible, but make it cinematic */
+/* Hide YouTube video, keep it running in background */
+:root[data-theater="on"] .stage iframe{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Keep wallpaper visible */
 :root[data-theater="on"] #wall{
   opacity:.72;
   filter:brightness(.58) saturate(.82);
   transform:scale(1.02);
 }
 
-/* Stronger cinematic darkness */
+/* Cinematic darkness */
 :root[data-theater="on"] .scrim{
   opacity:1;
   background:
@@ -190,7 +196,7 @@
     );
 }
 
-/* Remove station color wash in theater mode */
+/* Remove station color wash */
 :root[data-theater="on"] .station-tint{
   opacity:.04;
 }
