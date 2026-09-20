@@ -121,10 +121,17 @@
   .chip:hover{background:rgba(242,169,59,.4);border-color:var(--marigold)}
 
   #nowCard{
-    position:absolute;left:50%;top:16%;transform:translateX(-50%);
-    z-index:5;width:min(88%,520px);text-align:center;color:#F6EDDD;
-    pointer-events:none;text-shadow:0 3px 16px rgba(0,0,0,.65);
-  }
+  position:absolute;
+  left:50%;
+  top:16%;
+  transform:translateX(-50%);
+  z-index:5;
+  width:min(92%,760px);
+  text-align:center;
+  color:#F6EDDD;
+  pointer-events:none;
+  text-shadow:0 3px 16px rgba(0,0,0,.65);
+}
   #nowCard[hidden]{display:none}
   #nowTitle{font-family:"Yatra One",cursive;font-size:clamp(24px,5vw,42px);line-height:1.15}
   #nowMeta{margin-top:6px;font-size:14px;opacity:.85}
@@ -395,81 +402,6 @@
 .sleep-menu button:hover{
   background:rgba(242,169,59,.2);
 }
-.lyrics-panel{
-  position:fixed;
-  inset:0;
-  z-index:50;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:20px;
-
-  background:rgba(3,6,14,.18);
-
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
-}
-.lyrics-panel[hidden]{display:none}
-
-.lyrics-card{
-  width:min(720px,92vw);
-  max-height:86dvh;
-  overflow-y:auto;
-
-  background:rgba(8,13,28,.38);
-
-  border:1px solid rgba(246,237,221,.18);
-  border-radius:24px;
-
-  backdrop-filter:blur(16px) saturate(120%);
-  -webkit-backdrop-filter:blur(16px) saturate(120%);
-
-  box-shadow:
-    0 20px 60px rgba(0,0,0,.55),
-    inset 0 1px 0 rgba(255,255,255,.08);
-
-  padding:30px 24px;
-
-  scrollbar-width:thin;
-}
-
-.lyrics-card h2{
-  margin-bottom:2px;
-}
-
-#lyricsArtist{
-  color:#A8B2D1;
-  margin-bottom:22px;
-}
-
-#lyricsText{
-  white-space:pre-wrap;
-  line-height:1.9;
-  font-size:17px;
-}
-
-.lyrics-close{
-  position:absolute;
-  top:10px;
-  right:14px;
-  border:0;
-  background:transparent;
-  color:#F6EDDD;
-  font-size:28px;
-}
-
-.lyrics-btn{
-  pointer-events:auto;
-  cursor:pointer;
-  margin-top:12px;
-  border:1px solid rgba(246,237,221,.3);
-  background:rgba(8,13,28,.45);
-  color:#F6EDDD;
-  border-radius:999px;
-  padding:5px 13px;
-}
 #nowCard.station-change{
   animation:stationChange .35s ease;
 }
@@ -483,279 +415,66 @@
     opacity:1;
     transform:translateX(-50%) translateY(0);
   }
-}/* ---------- mobile optimization ---------- */
+}
+/* ---------- inline lyrics ---------- */
 
-@media (max-width: 640px){
-.lyrics-panel{
-  padding:10px;
-  background:rgba(3,6,14,.16);
+.inline-lyrics{
+  width:min(760px,92vw);
+  max-height:40vh;
+  margin:18px auto 0;
+  overflow:hidden;
+  pointer-events:none;
+
+  mask-image:linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+
+  -webkit-mask-image:linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
 }
 
-.lyrics-card{
+.inline-lyrics-text{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:26px 10px;
+  transition:transform .35s ease;
+}
+
+.lyric-line{
   width:100%;
-  height:92dvh;
-  max-height:92dvh;
-  padding:24px 14px;
-  border-radius:20px;
-
-  background:rgba(8,13,28,.42);
-
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
-
-.lyric-line{
-  font-size:16px;
-  padding:9px 10px;
-}
-
-.lyric-line.active{
-  transform:scale(1.03);
-}
-
-  /* Better portrait wallpaper framing */
-  #wall{
-    background-position:center center;
-    background-size:cover;
-  }
-
-  /* Reduce expensive blur on mobile */
-  .chip,
-  .player-bar{
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-  }
-
-  /* Top HUD */
-  .hud-top{
-    padding-left:12px;
-    padding-right:12px;
-    gap:8px;
-  }
-
-  .brand-mini{
-    gap:7px;
-  }
-
-  .dial{
-    width:32px;
-    height:32px;
-  }
-
-  .dial svg{
-    width:32px;
-    height:32px;
-  }
-
-  .brand-mini h1{
-    font-size:17px;
-  }
-
-  .hud-actions{
-    gap:5px;
-  }
-
-  .chip{
-    padding:7px 10px;
-    font-size:12px;
-  }
-
-  /* Now playing card */
-  #nowCard{
-    top:15%;
-    width:min(90%,420px);
-  }
-
-  #nowTitle{
-    font-size:clamp(23px,7vw,34px);
-  }
-
-  #nowMeta{
-    font-size:13px;
-  }
-
-  #nowQuote{
-    font-size:12px;
-    padding:0 12px;
-  }
-
-  /* Bottom player */
-  .player-bar{
-    bottom:calc(10px + env(safe-area-inset-bottom));
-    max-width:calc(100vw - 16px);
-    width:max-content;
-    gap:7px;
-    padding:8px 9px;
-    border-radius:18px;
-  }
-
-  .rnd{
-    width:38px;
-    height:38px;
-  }
-
-  .rnd.big{
-    width:46px;
-    height:46px;
-  }
-
-  .nowbox{
-    min-width:75px;
-    max-width:105px;
-  }
-
-  .nowbox .name{
-    font-size:14px;
-  }
-
-  .nowbox .label{
-    font-size:9px;
-  }
-
-  .visualizer{
-    display:none;
-  }
-
-  /* Keep the important controls visible */
-  #lyricsPlayerBtn,
-  #sleepBtn{
-    width:36px;
-    height:36px;
-    font-size:15px;
-  }
-
-  /* Sleep menu should stay above the mobile player */
-  .sleep-menu{
-    right:10px;
-    bottom:78px;
-  }
-
-  /* Stations drawer */
-  .drawer{
-    max-height:78dvh;
-    padding-left:14px;
-    padding-right:14px;
-  }
-
-  .stations{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:9px;
-  }
-
-  .plate{
-    padding:12px 11px 11px;
-  }
-
-  .plate .en{
-    font-size:16px;
-  }
-
-  .plate .hi{
-    font-size:12.5px;
-  }
-
-  /* Lyrics */
-
-  #lyricsText{
-    font-size:16px;
-    line-height:1.8;
-  }
-
-  /* Theater mode on mobile */
-  :root[data-theater="on"] #wall{
-    opacity:.68;
-    filter:brightness(.55) saturate(.8);
-  }
-
-  :root[data-theater="on"] .scrim{
-    opacity:1;
-  }
-
-}
-
-/* ---------- very small phones ---------- */
-
-@media (max-width:390px){
-
-  .hud-top{
-    padding-left:9px;
-    padding-right:9px;
-  }
-
-  .brand-mini h1{
-    font-size:15px;
-  }
-
-  .dial{
-    width:28px;
-    height:28px;
-  }
-
-  .dial svg{
-    width:28px;
-    height:28px;
-  }
-
-  .chip{
-    padding:6px 8px;
-    font-size:11px;
-  }
-
-  .player-bar{
-    gap:5px;
-    padding:7px;
-  }
-
-  .rnd{
-    width:34px;
-    height:34px;
-  }
-
-  .rnd.big{
-    width:42px;
-    height:42px;
-  }
-
-  .nowbox{
-    min-width:60px;
-    max-width:82px;
-  }
-
-  .nowbox .name{
-    font-size:13px;
-  }
-
-  #lyricsPlayerBtn,
-  #sleepBtn{
-    width:33px;
-    height:33px;
-  }
-
-  .stations{
-    grid-template-columns:1fr 1fr;
-  }
-
-}
-.lyric-line{
-  padding:10px 16px;
-  margin:4px 0;
+  padding:6px 10px;
+  margin:1px 0;
   text-align:center;
-  color:rgba(246,237,221,.42);
+
+  color:rgba(246,237,221,.38);
   font-size:18px;
-  line-height:1.6;
+  line-height:1.45;
+
   transition:
-    color .25s ease,
-    opacity .25s ease,
-    transform .25s ease,
-    text-shadow .25s ease;
+    color .3s ease,
+    opacity .3s ease,
+    transform .3s ease,
+    text-shadow .3s ease;
 }
 
 .lyric-line.active{
   color:#F6EDDD;
-  transform:scale(1.04);
+  transform:scale(1.06);
+
   text-shadow:
-    0 0 8px rgba(242,169,59,.9),
-    0 0 22px rgba(242,169,59,.55);
+    0 0 8px rgba(242,169,59,.95),
+    0 0 22px rgba(242,169,59,.6);
 }
 
 .lyric-line.plain{
@@ -766,7 +485,50 @@
 .lyrics-error{
   text-align:center;
   color:rgba(246,237,221,.72);
-  padding:40px 20px;
+  padding:30px 20px;
+}
+
+.lyrics-btn{
+  pointer-events:auto;
+  cursor:pointer;
+  margin-top:12px;
+
+  border:1px solid rgba(246,237,221,.3);
+  background:rgba(8,13,28,.45);
+  color:#F6EDDD;
+
+  border-radius:999px;
+  padding:5px 13px;
+}
+
+/* ---------- mobile optimization ---------- */
+
+@media (max-width:640px){
+
+  #nowCard{
+    width:94vw;
+    top:13%;
+  }
+
+  .inline-lyrics{
+    width:94vw;
+    max-height:38vh;
+    margin-top:14px;
+  }
+
+  .inline-lyrics-text{
+    padding:22px 6px;
+  }
+
+  .lyric-line{
+    font-size:15px;
+    line-height:1.4;
+    padding:5px 6px;
+  }
+
+  .lyric-line.active{
+    transform:scale(1.04);
+  }
 }
 </style>
 </head>
@@ -801,6 +563,11 @@
   <div id="nowTitle">RaagBox</div>
   <div id="nowMeta"></div>
   <div id="nowQuote"></div>
+
+  <div class="inline-lyrics" id="lyricsPanel" hidden>
+    <div class="inline-lyrics-text" id="lyricsText"></div>
+  </div>
+
   <button class="lyrics-btn" id="lyricsBtn">Lyrics</button>
 </div>
 
@@ -868,14 +635,6 @@
       </div>
       <textarea id="exportBox" hidden readonly aria-label="Station config"></textarea>
     </div>
-</section>
-<section class="lyrics-panel" id="lyricsPanel" hidden>
-  <div class="lyrics-card">
-    <button class="lyrics-close" id="lyricsClose">×</button>
-    <h2 id="lyricsTitle">Lyrics</h2>
-    <div id="lyricsArtist"></div>
-    <div id="lyricsText"></div>
-  </div>
 </section>
 </div>
 
@@ -1479,27 +1238,47 @@ function stopLyricsSync(){
 }
 
 function closeLyrics(){
-  $("lyricsPanel").hidden = true;
+  const panel = $("lyricsPanel");
+  if(!panel) return;
+
+  panel.hidden = true;
+  stopLyricsSync();
 }
 
-$("lyricsBtn").addEventListener("click", openLyrics);
-$("lyricsPlayerBtn").addEventListener("click", openLyrics);
-$("lyricsClose").addEventListener("click", closeLyrics);
+$("lyricsBtn").addEventListener("click", () => {
+  const panel = $("lyricsPanel");
 
-$("lyricsPanel").addEventListener("click", e => {
-  if(e.target === $("lyricsPanel")){
+  if(panel.hidden){
+    openLyrics();
+  }else{
     closeLyrics();
   }
 });
+$("lyricsPlayerBtn").addEventListener("click", () => {
+  const panel = $("lyricsPanel");
+
+  if(panel.hidden){
+    openLyrics();
+  }else{
+    closeLyrics();
+  }
+});
+
 /* ---------- tuning ---------- */
 function tune(i){
   const st = stations[i];
-if(!st) return;
+  if(!st) return;
 
-$("stationTint").style.setProperty(
-  "--station-color",
-  st.color || "#F2A93B"
-);
+  // Reset lyrics from previous song/station
+  closeLyrics();
+  stopLyricsSync();
+  activeLyrics = [];
+  $("lyricsText").innerHTML = "";
+
+  $("stationTint").style.setProperty(
+    "--station-color",
+    st.color || "#F2A93B"
+  );
 
 const id = playlistId(st.playlist);
   current = i;
