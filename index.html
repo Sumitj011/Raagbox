@@ -768,11 +768,13 @@
 <button class="rnd" id="sleepBtn" title="Sleep timer">🌙</button>
 
 <div class="sleep-menu" id="sleepMenu" hidden>
-  <button data-minutes="0">Off</button>
-  <button data-minutes="15">15 minutes</button>
-  <button data-minutes="30">30 minutes</button>
-  <button data-minutes="45">45 minutes</button>
-  <button data-minutes="60">60 minutes</button>
+  <button data-sleep="off">Off</button>
+  <button data-sleep="5">5 minutes</button>
+  <button data-sleep="15">15 minutes</button>
+  <button data-sleep="30">30 minutes</button>
+  <button data-sleep="45">45 minutes</button>
+  <button data-sleep="60">60 minutes</button>
+  <button data-sleep="end">End of this song</button>
 </div>
     </div>
   </div>
@@ -991,11 +993,17 @@ window.addEventListener("message", e => {
     updateMediaSession(title || stations[current]?.en, author || stations[current]?.hi);
   }
 
-  if(d && d.info && typeof d.info.playerState === "number"){
-    playing = d.info.playerState === 1;
-    setPlayIcon();
-    setMediaSessionState(playing ? "playing" : "paused");
+if(d && d.info && typeof d.info.playerState === "number"){
+  playing = d.info.playerState === 1;
+  setPlayIcon();
+  setMediaSessionState(playing ? "playing" : "paused");
+
+  // End of this song
+  // YouTube state 0 = ended
+  if(d.info.playerState === 0 && sleepEndOfSong){
+    stopForSleep();
   }
+}
 });
 function setPlayIcon(){
   $("playIcon").innerHTML = playing
@@ -1339,37 +1347,61 @@ $("shuffleBtn").addEventListener("click", () => {
 });
 $("vol").addEventListener("input", e => cmd("setVolume",[Number(e.target.value)]));
 let sleepTimer = null;
+let sleepEndOfSong = false;
 
 $("sleepBtn").addEventListener("click", () => {
   $("sleepMenu").hidden = !$("sleepMenu").hidden;
 });
 
+function clearSleepTimer(){
+  clearTimeout(sleepTimer);
+  sleepTimer = null;
+  sleepEndOfSong = false;
+  $("sleepBtn").textContent = "🌙";
+}
+
+function stopForSleep(){
+  cmd("pauseVideo");
+  playing = false;
+  setPlayIcon();
+  setMediaSessionState("paused");
+  sleepEndOfSong = false;
+  sleepTimer = null;
+  $("sleepBtn").textContent = "🌙";
+}
+
 $("sleepMenu").addEventListener("click", e => {
   const btn = e.target.closest("button");
   if(!btn) return;
 
-  const minutes = Number(btn.dataset.minutes);
+  const mode = btn.dataset.sleep;
 
-  clearTimeout(sleepTimer);
-  sleepTimer = null;
+  clearSleepTimer();
 
-  if(minutes > 0){
+  if(mode === "off"){
+    $("sleepMenu").hidden = true;
+    return;
+  }
+
+  if(mode === "end"){
+    sleepEndOfSong = true;
+    $("sleepBtn").textContent = "🌙 End";
+    $("sleepMenu").hidden = true;
+    return;
+  }
+
+  const minutes = Number(mode);
+
+  if(Number.isFinite(minutes) && minutes > 0){
     sleepTimer = setTimeout(() => {
-      cmd("pauseVideo");
-      playing = false;
-      setPlayIcon();
-      setMediaSessionState("paused");
-      $("sleepBtn").textContent = "🌙";
+      stopForSleep();
     }, minutes * 60 * 1000);
 
     $("sleepBtn").textContent = "🌙 " + minutes + "m";
-  }else{
-    $("sleepBtn").textContent = "🌙";
   }
 
   $("sleepMenu").hidden = true;
 });
-
 function openPanel(){
   $("panel").hidden = false;
   $("ownerBtn").setAttribute("aria-expanded", "true");
