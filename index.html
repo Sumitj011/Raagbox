@@ -824,12 +824,23 @@ if(d && d.info && d.info.videoData){
   );
 
   // Clear lyrics when YouTube moves to a new song
-  if(changed){
-    closeLyrics();
+ if(changed){
+  activeLyrics = [];
+  stopLyricsSync();
+  lyricsCurrentIndex = -1;
 
-    activeLyrics = [];
+  if(lyricsOpen){
+    $("lyricsText").innerHTML = `
+      <div class="lyrics-loading">
+        Finding lyrics...
+      </div>
+    `;
+
+    openLyrics();
+  }else{
     $("lyricsText").innerHTML = "";
   }
+}
 }
 
 if(d && d.info && typeof d.info.playerState === "number"){
@@ -1049,6 +1060,8 @@ async function findLyrics(){
 let activeLyrics = [];
 let lyricsAnimationFrame = null;
 let lyricsCurrentIndex = -1;
+let lyricsOpen = false;
+let lyricsRequestId = 0;
 
 function parseSyncedLyrics(syncedLyrics){
   if(!syncedLyrics) return [];
@@ -1088,7 +1101,15 @@ async function openLyrics(){
 
   if(!panel || !text) return;
 
+  lyricsOpen = true;
   panel.hidden = false;
+
+  const requestId = ++lyricsRequestId;
+
+  activeLyrics = [];
+  stopLyricsSync();
+  lyricsCurrentIndex = -1;
+
   text.innerHTML = `
     <div class="lyrics-loading">
       Finding lyrics...
@@ -1098,6 +1119,9 @@ async function openLyrics(){
   try{
     const data = await findLyrics();
     const result = data.result;
+
+    // Ignore old request if song changed meanwhile
+    if(!lyricsOpen || requestId !== lyricsRequestId) return;
 
     activeLyrics = parseSyncedLyrics(result.syncedLyrics);
 
@@ -1133,6 +1157,8 @@ async function openLyrics(){
   }catch(err){
     console.warn("Lyrics error:", err);
 
+    if(!lyricsOpen || requestId !== lyricsRequestId) return;
+
     activeLyrics = [];
     stopLyricsSync();
 
@@ -1143,125 +1169,21 @@ async function openLyrics(){
     `;
   }
 }
-function escapeHtml(text){
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-function getCurrentPlayerTime(){
-  return new Promise(resolve => {
-    let finished = false;
-
-    const handler = event => {
-      if(finished) return;
-
-      if(
-        event.origin !== "https://www.youtube-nocookie.com" &&
-        event.origin !== "https://www.youtube.com"
-      ){
-        return;
-      }
-
-      try{
-        const data = JSON.parse(event.data);
-
-        if(
-          data &&
-          data.event === "infoDelivery" &&
-          data.info &&
-          typeof data.info.currentTime === "number"
-        ){
-          finished = true;
-          window.removeEventListener("message", handler);
-          resolve(data.info.currentTime);
-        }
-      }catch(e){}
-    };
-
-    window.addEventListener("message", handler);
-
-    cmd("getCurrentTime");
-
-    setTimeout(() => {
-      if(!finished){
-        finished = true;
-        window.removeEventListener("message", handler);
-        resolve(0);
-      }
-    }, 250);
-  });
-}
-
-async function updateCurrentLyric(){
-  if(!activeLyrics.length) return;
-
-  const currentTime = await getCurrentPlayerTime();
-
-  let index = -1;
-
-  for(let i = 0; i < activeLyrics.length; i++){
-    if(activeLyrics[i].time <= currentTime){
-      index = i;
-    }else{
-      break;
-    }
-  }
-
-  if(index === lyricsCurrentIndex) return;
-
-  lyricsCurrentIndex = index;
-
-  const lines = document.querySelectorAll(".lyric-line");
-
-  lines.forEach((line, i) => {
-    line.classList.toggle("active", i === index);
-  });
-
-  if(index >= 0){
-    const active = lines[index];
-
-    active?.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-  }
-}
-
-function startLyricsSync(){
-  stopLyricsSync();
-
-  lyricsCurrentIndex = -1;
-
-  const loop = async () => {
-    await updateCurrentLyric();
-
-    lyricsAnimationFrame = setTimeout(
-      loop,
-      250
-    );
-  };
-
-  loop();
-}
-
-function stopLyricsSync(){
-  if(lyricsAnimationFrame){
-    clearTimeout(lyricsAnimationFrame);
-    lyricsAnimationFrame = null;
-  }
-
-  lyricsCurrentIndex = -1;
-}
 
 function closeLyrics(){
   const panel = $("lyricsPanel");
+
   if(!panel) return;
 
+  lyricsOpen = false;
+  ++lyricsRequestId;
+
   panel.hidden = true;
+
   stopLyricsSync();
+
+  activeLyrics = [];
+  $("lyricsText").innerHTML = "";
 }
 
 $("lyricsPlayerBtn").addEventListener("click", () => {
@@ -1281,9 +1203,21 @@ function tune(i){
 
   
  // Reset lyrics from previous song/station
-closeLyrics();
-activeLyrics = [];
-$("lyricsText").innerHTML = "";
+if(lyricsOpen){
+  activeLyrics = [];
+  stopLyricsSync();
+  lyricsCurrentIndex = -1;
+
+  $("lyricsText").innerHTML = `
+    <div class="lyrics-loading">
+      Finding lyrics...
+    </div>
+  `;
+}else{
+  activeLyrics = [];
+  stopLyricsSync();
+  $("lyricsText").innerHTML = "";
+}
 
   $("stationTint").style.setProperty(
     "--station-color",
