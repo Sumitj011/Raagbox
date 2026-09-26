@@ -1091,17 +1091,106 @@ function parseSyncedLyrics(syncedLyrics){
 
   return lines.sort((a,b) => a.time - b.time);
 }
+function getCurrentPlayerTime() {
+  return new Promise(resolve => {
+    let finished = false;
+
+    const handler = event => {
+      if (finished) return;
+
+      if (
+        event.origin !== "https://www.youtube-nocookie.com" &&
+        event.origin !== "https://www.youtube.com"
+      ) {
+        return;
+      }
+
+      try {
+        const data = JSON.parse(event.data);
+
+        if (
+          data &&
+          data.event === "infoDelivery" &&
+          data.info &&
+          typeof data.info.currentTime === "number"
+        ) {
+          finished = true;
+          window.removeEventListener("message", handler);
+          resolve(data.info.currentTime);
+        }
+      } catch(e) {}
+    };
+
+    window.addEventListener("message", handler);
+
+    cmd("getCurrentTime");
+
+    setTimeout(() => {
+      if(!finished){
+        finished = true;
+        window.removeEventListener("message", handler);
+        resolve(0);
+      }
+    }, 250);
+  });
+}
+
 function stopLyricsSync(){
   if(lyricsAnimationFrame){
-    cancelAnimationFrame(lyricsAnimationFrame);
+    clearTimeout(lyricsAnimationFrame);
     lyricsAnimationFrame = null;
   }
 
   lyricsCurrentIndex = -1;
 }
 
+async function updateCurrentLyric(){
+  if(!activeLyrics.length) return;
+
+  const currentTime = await getCurrentPlayerTime();
+
+  let index = -1;
+
+  for(let i = 0; i < activeLyrics.length; i++){
+    if(activeLyrics[i].time <= currentTime){
+      index = i;
+    }else{
+      break;
+    }
+  }
+
+  if(index === lyricsCurrentIndex) return;
+
+  lyricsCurrentIndex = index;
+
+  const lines = document.querySelectorAll(".lyric-line");
+
+  lines.forEach((line, i) => {
+    line.classList.toggle("active", i === index);
+  });
+
+  if(index >= 0){
+    const active = lines[index];
+
+    active?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+}
+
 function startLyricsSync(){
   stopLyricsSync();
+
+  lyricsCurrentIndex = -1;
+
+  const loop = async () => {
+    await updateCurrentLyric();
+
+    lyricsAnimationFrame = setTimeout(loop, 250);
+  };
+
+  loop();
 }
 
 function escapeHtml(text){
@@ -1120,6 +1209,7 @@ async function openLyrics() {
   if (!panel || !text) return;
 
   panel.hidden = false;
+  lyricsOpen = true;
   text.innerHTML = `<div class="lyrics-loading">Finding lyrics...</div>`;
 
   const requestId = ++lyricsRequestId;
