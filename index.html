@@ -803,7 +803,7 @@ if(d && d.info && d.info.videoData){
 
   const videoKey = title + "||" + author;
   const changed = lastVideoKey !== videoKey;
-
+  
   lastVideoKey = videoKey;
 
   $("nowTitle").textContent =
@@ -1057,8 +1057,8 @@ async function findLyrics(){
 let activeLyrics = [];
 let lyricsAnimationFrame = null;
 let lyricsCurrentIndex = -1;
-let lyricsOpen = false;
 let lyricsRequestId = 0;
+let lyricsOpen = false;
 
 function parseSyncedLyrics(syncedLyrics){
   if(!syncedLyrics) return [];
@@ -1113,37 +1113,28 @@ function escapeHtml(text){
     .replace(/'/g, "&#039;");
 }
   
-async function openLyrics(){
+async function openLyrics() {
   const panel = $("lyricsPanel");
   const text = $("lyricsText");
 
-  if(!panel || !text) return;
+  if (!panel || !text) return;
 
-  lyricsOpen = true;
   panel.hidden = false;
+  text.innerHTML = `<div class="lyrics-loading">Finding lyrics...</div>`;
 
   const requestId = ++lyricsRequestId;
 
-  activeLyrics = [];
-  stopLyricsSync();
-  lyricsCurrentIndex = -1;
-
-  text.innerHTML = `
-    <div class="lyrics-loading">
-      Finding lyrics...
-    </div>
-  `;
-
-  try{
+  try {
     const data = await findLyrics();
-    const result = data.result;
 
-    // Ignore old request if song changed meanwhile
-    if(!lyricsOpen || requestId !== lyricsRequestId) return;
+    // Ignore old lyrics response if a newer request has started
+    if (requestId !== lyricsRequestId) return;
+
+    const result = data.result;
 
     activeLyrics = parseSyncedLyrics(result.syncedLyrics);
 
-    if(activeLyrics.length){
+    if (activeLyrics.length) {
       text.innerHTML = activeLyrics.map((line, index) => `
         <div class="lyric-line"
              data-index="${index}"
@@ -1156,14 +1147,10 @@ async function openLyrics(){
       return;
     }
 
-    if(result.plainLyrics){
+    if (result.plainLyrics) {
       text.innerHTML = result.plainLyrics
         .split("\n")
-        .map(line => `
-          <div class="lyric-line plain">
-            ${escapeHtml(line)}
-          </div>
-        `)
+        .map(line => `<div class="lyric-line plain">${escapeHtml(line)}</div>`)
         .join("");
 
       stopLyricsSync();
@@ -1172,19 +1159,17 @@ async function openLyrics(){
 
     throw new Error("No lyrics available");
 
-  }catch(err){
-    console.warn("Lyrics error:", err);
+  } catch (err) {
+    // Ignore errors from an outdated request
+    if (requestId !== lyricsRequestId) return;
 
-    if(!lyricsOpen || requestId !== lyricsRequestId) return;
+    console.warn("Lyrics error:", err);
 
     activeLyrics = [];
     stopLyricsSync();
 
-    text.innerHTML = `
-      <div class="lyrics-error">
-        Lyrics couldn't be confidently matched to this song.
-      </div>
-    `;
+    text.innerHTML =
+      `<div class="lyrics-error">Lyrics couldn't be confidently matched to this song.</div>`;
   }
 }
 
@@ -1219,29 +1204,19 @@ function tune(i){
   const st = stations[i];
   if(!st) return;
 
-  
- // Reset lyrics from previous song/station
+ 
 if(lyricsOpen){
- ++lyricsRequestId;
-  activeLyrics = [];
-  stopLyricsSync();
-  lyricsCurrentIndex = -1;
+  // Reset lyrics from previous song/station
+  lastVideoKey = "";
 
-  $("lyricsText").innerHTML = `
-    <div class="lyrics-loading">
-      Finding lyrics...
-    </div>
-  `;
+  closeLyrics();
+  activeLyrics = [];
+  $("lyricsText").innerHTML = "";
 }else{
   activeLyrics = [];
   stopLyricsSync();
   $("lyricsText").innerHTML = "";
 }
-
-  $("stationTint").style.setProperty(
-    "--station-color",
-    st.color || "#F2A93B"
-  );
 
 const id = playlistId(st.playlist);
   current = i;
