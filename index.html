@@ -286,6 +286,23 @@
   .sechead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 14px;flex-wrap:wrap}
   h2{font-family:"Yatra One",cursive;font-weight:400;font-size:22px;margin:0}
   .hint{color:#A8B2D1;font-size:13.5px;margin:0}
+  .fav-filter{
+    background:rgba(255,255,255,.08);
+    border:1.5px solid rgba(246,237,221,.25);
+    color:#F6EDDD;
+    border-radius:999px;
+    padding:7px 14px;
+    font-size:13px;
+    font-weight:600;
+    flex:none;
+  }
+  .fav-filter:hover{border-color:#E0457B}
+  .fav-filter.active{
+    background:rgba(224,69,123,.22);
+    border-color:#E0457B;
+    color:#E0457B;
+  }
+  .no-favs{color:#A8B2D1;font-size:13.5px;padding:18px 4px}
 
   .stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
   .recent-stations{
@@ -605,8 +622,9 @@
     <div class="drawer-handle"></div>
     <div class="sechead">
       <h2>Stations</h2>
-      <p class="hint">Shuffle ON karo to gaane random order mein chalenge.</p>
+      <button class="fav-filter" id="favFilterBtn" aria-pressed="false">♥ Favorites</button>
     </div>
+    <p class="hint">Shuffle ON karo to gaane random order mein chalenge.</p>
 	<div id="recentStations" class="recent-stations"></div>
     <div class="stations" id="stations"></div>
     <p class="drawer-credit">RaagBox — gaane YouTube se chalte hain. Koi signup nahi.</p>
@@ -649,6 +667,7 @@ const DEFAULT_STATIONS = [
 const KEY = "raagbox.stations.v1";
 const FAVORITES_KEY = "raagbox.favorites.v1";
 let favorites = [];
+let showFavoritesOnly = false;
 const RECENT_KEY = "raagbox.recent.v1";
 let recentStations = [];
 
@@ -707,6 +726,7 @@ function toggleFavorite(s){
 const $ = id => document.getElementById(id);
 let stations = [], current = -1, playing = false, hs = null;
 let lastVideoKey = "";
+let latestPlayerTime = 0;
 /* ---------- storage ---------- */
 function load(){
   try{
@@ -838,6 +858,10 @@ if(d && d.info && d.info.videoData){
     $("lyricsText").innerHTML = "";
   }
 }
+}
+
+if(d && d.info && typeof d.info.currentTime === "number"){
+  latestPlayerTime = d.info.currentTime;
 }
 
 if(d && d.info && typeof d.info.playerState === "number"){
@@ -1092,47 +1116,12 @@ function parseSyncedLyrics(syncedLyrics){
   return lines.sort((a,b) => a.time - b.time);
 }
 function getCurrentPlayerTime() {
-  return new Promise(resolve => {
-    let finished = false;
-
-    const handler = event => {
-      if (finished) return;
-
-      if (
-        event.origin !== "https://www.youtube-nocookie.com" &&
-        event.origin !== "https://www.youtube.com"
-      ) {
-        return;
-      }
-
-      try {
-        const data = JSON.parse(event.data);
-
-        if (
-          data &&
-          data.event === "infoDelivery" &&
-          data.info &&
-          typeof data.info.currentTime === "number"
-        ) {
-          finished = true;
-          window.removeEventListener("message", handler);
-          resolve(data.info.currentTime);
-        }
-      } catch(e) {}
-    };
-
-    window.addEventListener("message", handler);
-
-    cmd("getCurrentTime");
-
-    setTimeout(() => {
-      if(!finished){
-        finished = true;
-        window.removeEventListener("message", handler);
-        resolve(0);
-      }
-    }, 250);
-  });
+  // YouTube periodically pushes "infoDelivery" messages with currentTime
+  // on its own; we just request a fresh one and read the latest value
+  // we've cached from any such message (no fragile request/response
+  // matching needed).
+  cmd("getCurrentTime");
+  return Promise.resolve(latestPlayerTime);
 }
 
 function stopLyricsSync(){
@@ -1201,7 +1190,11 @@ function escapeHtml(text){
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-  
+
+function wait(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function openLyrics() {
   const panel = $("lyricsPanel");
   const text = $("lyricsText");
@@ -1213,53 +1206,78 @@ async function openLyrics() {
   text.innerHTML = `<div class="lyrics-loading">Finding lyrics...</div>`;
 
   const requestId = ++lyricsRequestId;
+  const maxAttempts = 4;
+  const retryDelayMs = 1200;
 
-  try {
-    const data = await findLyrics();
-
-    // Ignore old lyrics response if a newer request has started
+  for(let attempt = 1; attempt <= maxAttempts; attempt++){
     if (requestId !== lyricsRequestId) return;
 
-    const result = data.result;
+    // YouTube can take a moment to report the real song title after a
+    // station switch — until then nowTitle still shows the station's
+    // placeholder name. Searching lyrics for that would always fail,
+    // so wait and retry instead of giving up immediately.
+    const titleEl = $("nowTitle")?.textContent?.trim() || "";
+    const st = stations[current];
+    const looksLikePlaceholder = !titleEl || (st && titleEl === st.en);
 
-    activeLyrics = parseSyncedLyrics(result.syncedLyrics);
-
-    if (activeLyrics.length) {
-      text.innerHTML = activeLyrics.map((line, index) => `
-        <div class="lyric-line"
-             data-index="${index}"
-             data-time="${line.time}">
-          ${escapeHtml(line.text)}
-        </div>
-      `).join("");
-
-      startLyricsSync();
-      return;
+    if(looksLikePlaceholder && attempt < maxAttempts){
+      await wait(retryDelayMs);
+      continue;
     }
 
-    if (result.plainLyrics) {
-      text.innerHTML = result.plainLyrics
-        .split("\n")
-        .map(line => `<div class="lyric-line plain">${escapeHtml(line)}</div>`)
-        .join("");
+    try {
+      const data = await findLyrics();
 
+      // Ignore old lyrics response if a newer request has started
+      if (requestId !== lyricsRequestId) return;
+
+      const result = data.result;
+
+      activeLyrics = parseSyncedLyrics(result.syncedLyrics);
+
+      if (activeLyrics.length) {
+        text.innerHTML = activeLyrics.map((line, index) => `
+          <div class="lyric-line"
+               data-index="${index}"
+               data-time="${line.time}">
+            ${escapeHtml(line.text)}
+          </div>
+        `).join("");
+
+        startLyricsSync();
+        return;
+      }
+
+      if (result.plainLyrics) {
+        text.innerHTML = result.plainLyrics
+          .split("\n")
+          .map(line => `<div class="lyric-line plain">${escapeHtml(line)}</div>`)
+          .join("");
+
+        stopLyricsSync();
+        return;
+      }
+
+      throw new Error("No lyrics available");
+
+    } catch (err) {
+      // Ignore errors from an outdated request
+      if (requestId !== lyricsRequestId) return;
+
+      console.warn("Lyrics error (attempt " + attempt + "):", err);
+
+      if(attempt < maxAttempts){
+        await wait(retryDelayMs);
+        continue;
+      }
+
+      activeLyrics = [];
       stopLyricsSync();
+
+      text.innerHTML =
+        `<div class="lyrics-error">Lyrics couldn't be confidently matched to this song.</div>`;
       return;
     }
-
-    throw new Error("No lyrics available");
-
-  } catch (err) {
-    // Ignore errors from an outdated request
-    if (requestId !== lyricsRequestId) return;
-
-    console.warn("Lyrics error:", err);
-
-    activeLyrics = [];
-    stopLyricsSync();
-
-    text.innerHTML =
-      `<div class="lyrics-error">Lyrics couldn't be confidently matched to this song.</div>`;
   }
 }
 
@@ -1294,21 +1312,21 @@ function tune(i){
   const st = stations[i];
   if(!st) return;
 
- 
-if(lyricsOpen){
-  // Reset lyrics from previous song/station
+  // Always reset so the next real videoData event is detected as
+  // "changed", whether or not the lyrics panel happens to be open.
   lastVideoKey = "";
 
-  closeLyrics();
-  activeLyrics = [];
-  $("lyricsText").innerHTML = "";
-}else{
+  if(lyricsOpen){
+    closeLyrics();
+  }
+
   activeLyrics = [];
   stopLyricsSync();
   $("lyricsText").innerHTML = "";
-}
 
-const id = playlistId(st.playlist);
+  document.documentElement.style.setProperty("--station-color", st.color || "#F2A93B");
+
+  const id = playlistId(st.playlist);
   current = i;
   rememberRecent(st);
   renderStations();
@@ -1357,7 +1375,16 @@ function renderStations(){
   const box = $("stations");
   box.innerHTML = "";
 
-  stations.forEach((s, i) => {
+  const list = showFavoritesOnly ? stations.filter(isFavorite) : stations;
+
+  if(showFavoritesOnly && !list.length){
+    box.innerHTML = '<p class="no-favs">Abhi koi favorite station nahi hai. Kisi station par ♡ dabakar favorite banao.</p>';
+    renderRecentStations();
+    return;
+  }
+
+  list.forEach((s) => {
+    const i = stations.indexOf(s);
     const wrap = document.createElement("div");
     wrap.className = "station-item";
 
@@ -1422,6 +1449,15 @@ function renderRecentStations(){
     "<strong>Recently played</strong>" +
     names.map(name => "• " + name).join(" &nbsp; ");
 }
+
+$("favFilterBtn").addEventListener("click", () => {
+  showFavoritesOnly = !showFavoritesOnly;
+  $("favFilterBtn").classList.toggle("active", showFavoritesOnly);
+  $("favFilterBtn").setAttribute("aria-pressed", showFavoritesOnly ? "true" : "false");
+  $("favFilterBtn").textContent = showFavoritesOnly ? "Sabhi stations" : "♥ Favorites";
+  renderStations();
+});
+
 /* ---------- owner panel ---------- */
 function renderRows(){
   const box = $("rows");
