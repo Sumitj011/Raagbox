@@ -93,9 +93,6 @@
   background:var(--station-color,#F2A93B);
 }
 
-:root[data-theater="on"] .station-tint{
-  opacity:0;
-}
 
   /* ---------- floating HUD ---------- */
   .hud-top{
@@ -805,7 +802,7 @@ if(d && d.info && d.info.videoData){
   const author = (d.info.videoData.author || "").trim();
 
   const videoKey = title + "||" + author;
-  const changed = lastVideoKey && lastVideoKey !== videoKey;
+  const changed = lastVideoKey !== videoKey;
 
   lastVideoKey = videoKey;
 
@@ -892,7 +889,7 @@ function extractSongArtist(title, author = ""){
   let artist = String(author || "").trim();
 
   const parts = cleaned
-    .split(/\s+-\s+|\s+\|\s+|\s+:\s+/)
+  .split(/\s+-\s+|\s+\|\s+|\s+:\s+/)
     .map(x => x.trim())
     .filter(Boolean);
 
@@ -1094,6 +1091,27 @@ function parseSyncedLyrics(syncedLyrics){
 
   return lines.sort((a,b) => a.time - b.time);
 }
+function stopLyricsSync(){
+  if(lyricsAnimationFrame){
+    cancelAnimationFrame(lyricsAnimationFrame);
+    lyricsAnimationFrame = null;
+  }
+
+  lyricsCurrentIndex = -1;
+}
+
+function startLyricsSync(){
+  stopLyricsSync();
+}
+
+function escapeHtml(text){
+  return String(text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
   
 async function openLyrics(){
   const panel = $("lyricsPanel");
@@ -1204,6 +1222,7 @@ function tune(i){
   
  // Reset lyrics from previous song/station
 if(lyricsOpen){
+ ++lyricsRequestId;
   activeLyrics = [];
   stopLyricsSync();
   lyricsCurrentIndex = -1;
