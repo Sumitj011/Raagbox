@@ -433,6 +433,35 @@
 }
 /* ---------- inline lyrics ---------- */
 
+.lyrics-sync-controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:max-content;
+  margin:14px auto 0;
+  padding:4px 6px;
+  pointer-events:auto;
+  background:rgba(8,13,28,.55);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(246,237,221,.25);
+  border-radius:999px;
+  font-size:11.5px;
+  color:#B9C0DE;
+}
+.lyrics-sync-controls[hidden]{display:none}
+.lyrics-sync-controls button{
+  border:0;
+  background:rgba(255,255,255,.08);
+  color:#F6EDDD;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:11.5px;
+  line-height:1.4;
+}
+.lyrics-sync-controls button:hover{background:rgba(242,169,59,.35)}
+#syncOffsetLabel{min-width:44px;text-align:center}
+
 .inline-lyrics{
   width:min(760px,92vw);
   max-height:40vh;
@@ -576,6 +605,12 @@
   <div id="nowTitle">RaagBox</div>
   <div id="nowMeta"></div>
   <div id="nowQuote"></div>
+
+  <div class="lyrics-sync-controls" id="lyricsSyncControls" hidden>
+    <button id="syncMinusBtn" title="Agar lyrics ahead/jaldi chal rahi hain">−0.5s</button>
+    <span id="syncOffsetLabel">Sync</span>
+    <button id="syncPlusBtn" title="Agar lyrics peeche/late chal rahi hain">+0.5s</button>
+  </div>
 
   <div class="inline-lyrics" id="lyricsPanel" hidden>
     <div class="inline-lyrics-text" id="lyricsText"></div>
@@ -846,6 +881,7 @@ if(d && d.info && d.info.videoData){
   activeLyrics = [];
   stopLyricsSync();
   lyricsCurrentIndex = -1;
+  resetLyricsOffset();
 
   if(lyricsOpen){
     $("lyricsText").innerHTML = `
@@ -917,14 +953,26 @@ function extractSongArtist(title, author = ""){
   // like "Sniper | Muzical Doctorz Sukhe Feat Raftaar | ... | Speed
   // Records" was being searched as one giant unmatched blob instead of
   // being split into its actual segments.
-  const rawParts = raw
-    .split(/\s+-\s+|\s+\|\s+|\s+:\s+/)
+  // A standalone capital "I" is also treated as a separator: many Punjabi
+  // uploads type it in place of "|" (e.g. "Actor I Actor I Movie Name").
+  const segments = raw
+    .split(/\s+-\s+|\s+\|\s+|\s+:\s+|\s+I\s+/)
     .map(part => cleanMusicText(part))
     .filter(Boolean);
 
-  const song = (rawParts[0] || cleaned).trim();
-  const channelArtist = String(author || "").trim();
-  const segmentArtist = (rawParts.length >= 2 ? rawParts[1] : "").trim();
+  // Many song titles lead with the song name in ALL CAPS followed by the
+  // singer(s) in normal case with no separator at all between them
+  // (e.g. "BACHALO Akhil"). Pull that leading caps run out as an extra
+  // guess at the real song name.
+  const capsMatch = raw.match(/^[A-Z0-9]+(?:['’.]?[A-Z0-9]+)*(?:\s+[A-Z0-9]+(?:['’.]?[A-Z0-9]+)*)*/);
+  const capsRun = capsMatch ? capsMatch[0].trim() : "";
+
+  const song = (segments[0] || cleaned).trim();
+
+  // YouTube auto-generates "<Artist Name> - Topic" channels for music —
+  // strip that suffix so we search for the real artist name.
+  const channelArtist = String(author || "").trim().replace(/\s*[-–—]\s*topic\s*$/i, "").trim();
+  const segmentArtist = (segments.length >= 2 ? segments[1] : "").trim();
 
   // Prefer the channel/uploader name when we have one, but keep the
   // title's own second segment around too — for label/channel uploads
@@ -939,6 +987,8 @@ function extractSongArtist(title, author = ""){
     song,
     artist,
     altArtist,
+    segments,
+    capsRun: (capsRun && capsRun.length >= 3 && capsRun !== song) ? capsRun : "",
     normalizedSong: normalizeMusicText(song),
     normalizedArtist: normalizeMusicText(artist)
   };
@@ -961,6 +1011,27 @@ function similarity(a, b){
   });
 
   return common / Math.max(aw.size, bw.size);
+}
+
+// Detects which script a lyrics submission is written in, so that when
+// lrclib has more than one submission for the same song (e.g. an
+// Urdu-script version and a separately-typed Roman/Hinglish version —
+// common for Coke Studio-style tracks), we can prefer whichever is
+// already in Latin script instead of picking whichever happened to be
+// first in the results.
+function detectLyricsScript(result){
+  const text = (result.plainLyrics || result.syncedLyrics || "").trim();
+  if(!text) return "unknown";
+
+  const arabicCount = (text.match(/[\u0600-\u06FF\u0750-\u077F]/g) || []).length;
+  const devanagariCount = (text.match(/[\u0900-\u097F]/g) || []).length;
+  const gurmukhiCount = (text.match(/[\u0A00-\u0A7F]/g) || []).length;
+  const latinCount = (text.match(/[A-Za-z]/g) || []).length;
+
+  const counts = { arabic: arabicCount, devanagari: devanagariCount, gurmukhi: gurmukhiCount, latin: latinCount };
+  const top = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
+
+  return counts[top] > 0 ? top : "unknown";
 }
 
 function scoreLyricsResult(result, info){
@@ -986,39 +1057,43 @@ function scoreLyricsResult(result, info){
     score += 0.05;
   }
 
+  // Small tie-breaking nudge toward already-Latin-script lyrics — an
+  // existing human-typed Hinglish/Roman submission reads far better than
+  // anything we could transliterate on the fly, so prefer it when the
+  // song otherwise matches equally well.
+  if(detectLyricsScript(result) === "latin"){
+    score += 0.08;
+  }
+
   return score;
 }
 
 function buildLyricsSearchCandidates(info){
   const candidates = [];
+  const seen = new Set();
 
-  if(info.song && info.artist){
-    candidates.push({
-      track_name: info.song,
-      artist_name: info.artist
-    });
+  function addCandidate(trackName, artistName){
+    trackName = (trackName || "").trim();
+    if(!trackName) return;
+    const key = trackName.toLowerCase() + "||" + String(artistName || "").toLowerCase();
+    if(seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ track_name: trackName, artist_name: artistName || "" });
   }
 
-  if(info.song && info.altArtist){
-    candidates.push({
-      track_name: info.song,
-      artist_name: info.altArtist
-    });
-  }
+  addCandidate(info.song, info.artist);
+  addCandidate(info.song, info.altArtist);
+  addCandidate(info.song, "");
+  addCandidate(info.capsRun, info.artist);
+  addCandidate(info.capsRun, "");
 
-  if(info.song){
-    candidates.push({
-      track_name: info.song,
-      artist_name: ""
-    });
-  }
+  // Titles put the real song name in different spots depending on the
+  // channel's style — some lead with the song, some lead with the cast
+  // ("Actor I Actor I Song | Writer | Composer"). Try every individual
+  // segment as a possible song name so odd orderings still get a shot.
+  (info.segments || []).forEach(seg => addCandidate(seg, ""));
 
-  if(info.cleanTitle && info.cleanTitle !== info.song){
-    candidates.push({
-      track_name: info.cleanTitle,
-      artist_name: ""
-    });
-  }
+  addCandidate(info.cleanTitle, "");
 
   return candidates;
 }
@@ -1039,6 +1114,8 @@ async function findLyrics(){
 
   let bestResult = null;
   let bestScore = 0;
+  let bestTitleOnlyResult = null;
+  let bestTitleOnlyScore = 0;
 
   for(const candidate of candidates){
     try{
@@ -1062,12 +1139,18 @@ async function findLyrics(){
 
       for(const result of results){
         const score = scoreLyricsResult(result, info);
+        const titleOnly = similarity(info.song, result.trackName || result.name || "");
 
         console.log("Lyrics candidate score:", score, result);
 
         if(score > bestScore){
           bestScore = score;
           bestResult = result;
+        }
+
+        if(titleOnly > bestTitleOnlyScore){
+          bestTitleOnlyScore = titleOnly;
+          bestTitleOnlyResult = result;
         }
       }
 
@@ -1078,20 +1161,32 @@ async function findLyrics(){
     }
   }
 
-  // Do not show suspiciously unrelated lyrics.
-  if(!bestResult || bestScore < 0.55){
+  // Do not show suspiciously unrelated lyrics — but a near-perfect song
+  // title match (info.song vs the track name) is trusted even when the
+  // artist field disagrees, since the "artist" we have is sometimes just
+  // the uploading channel/label rather than the traditional attribution
+  // (common for bhajans, qawwalis, devotional channels, etc.).
+  let finalResult = bestResult;
+  let finalScore = bestScore;
+
+  if((!finalResult || finalScore < 0.55) && bestTitleOnlyResult && bestTitleOnlyScore >= 0.8){
+    finalResult = bestTitleOnlyResult;
+    finalScore = bestTitleOnlyScore;
+  }
+
+  if(!finalResult || finalScore < 0.55){
     throw new Error("Lyrics could not be confidently matched");
   }
 
   console.log("Selected lyrics:", {
-    score: bestScore,
-    result: bestResult
+    score: finalScore,
+    result: finalResult
   });
 
   return {
     info,
-    result: bestResult,
-    score: bestScore
+    result: finalResult,
+    score: finalScore
   };
 }
 let activeLyrics = [];
@@ -1149,15 +1244,43 @@ function stopLyricsSync(){
   lyricsCurrentIndex = -1;
 }
 
+// Different YouTube uploads of the same song often have different intro
+// lengths (channel logo, a few seconds of silence, etc.) before the song
+// actually starts — something no timing data can guess automatically.
+// This lets the listener nudge the sync by hand per song.
+let lyricsOffsetSeconds = 0;
+
+function resetLyricsOffset(){
+  lyricsOffsetSeconds = 0;
+  updateSyncOffsetLabel();
+}
+
+function updateSyncOffsetLabel(){
+  const label = $("syncOffsetLabel");
+  if(!label) return;
+  label.textContent = lyricsOffsetSeconds === 0
+    ? "Sync"
+    : (lyricsOffsetSeconds > 0 ? "+" : "") + lyricsOffsetSeconds.toFixed(1) + "s";
+}
+
+function adjustLyricsOffset(delta){
+  lyricsOffsetSeconds = Math.max(-15, Math.min(15, lyricsOffsetSeconds + delta));
+  updateSyncOffsetLabel();
+}
+
+$("syncMinusBtn")?.addEventListener("click", () => adjustLyricsOffset(-0.5));
+$("syncPlusBtn")?.addEventListener("click", () => adjustLyricsOffset(0.5));
+
 async function updateCurrentLyric(){
   if(!activeLyrics.length) return;
 
   const currentTime = await getCurrentPlayerTime();
+  const adjustedTime = Math.max(0, currentTime + lyricsOffsetSeconds);
 
   let index = -1;
 
   for(let i = 0; i < activeLyrics.length; i++){
-    if(activeLyrics[i].time <= currentTime){
+    if(activeLyrics[i].time <= adjustedTime){
       index = i;
     }else{
       break;
@@ -1293,6 +1416,7 @@ async function openLyrics() {
           </div>
         `).join("");
 
+        if($("lyricsSyncControls")) $("lyricsSyncControls").hidden = false;
         startLyricsSync();
         return;
       }
@@ -1303,6 +1427,7 @@ async function openLyrics() {
           .map(line => `<div class="lyric-line plain">${escapeHtml(toHinglishIfGurmukhi(line))}</div>`)
           .join("");
 
+        if($("lyricsSyncControls")) $("lyricsSyncControls").hidden = true;
         stopLyricsSync();
         return;
       }
@@ -1322,6 +1447,7 @@ async function openLyrics() {
 
       activeLyrics = [];
       stopLyricsSync();
+      if($("lyricsSyncControls")) $("lyricsSyncControls").hidden = true;
 
       text.innerHTML =
         `<div class="lyrics-error">Lyrics couldn't be confidently matched to this song.</div>`;
@@ -1339,6 +1465,7 @@ function closeLyrics(){
   ++lyricsRequestId;
 
   panel.hidden = true;
+  if($("lyricsSyncControls")) $("lyricsSyncControls").hidden = true;
 
   stopLyricsSync();
 
@@ -1372,6 +1499,7 @@ function tune(i){
 
   activeLyrics = [];
   stopLyricsSync();
+  resetLyricsOffset();
   $("lyricsText").style.transform = "";
   $("lyricsText").innerHTML = "";
 
