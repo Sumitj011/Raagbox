@@ -84,6 +84,18 @@
   background-position:center;
   background-repeat:no-repeat;
 }
+
+/* On tall/narrow screens, background-size:cover crops this wide painting
+   down to a thin centered vertical strip — centered at 50% that strip
+   only contained the person's legs, cropping the face/torso/radio out
+   entirely. Shifting the focal point right keeps the whole figure and
+   radio in frame. Wide/desktop viewports crop top/bottom instead of
+   left/right, so they're unaffected and stay at dead-center. */
+@media (max-width:700px){
+  #wall{
+    background-position:68% center;
+  }
+}
   .scrim{
     position:absolute;inset:0;z-index:3;pointer-events:none;
     background:
@@ -153,7 +165,7 @@
   .player-bar{
     position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);
     z-index:7;display:flex;align-items:center;gap:12px;max-width:94vw;
-    background:rgba(8,13,28,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:rgba(8,13,28,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
     border:1px solid rgba(246,237,221,.2);border-radius:22px;
     padding:10px 14px;box-shadow:0 16px 40px rgba(0,0,0,.45);
     flex-wrap:nowrap;overflow:visible;
@@ -278,28 +290,25 @@
   .vol input{width:100%;accent-color:var(--rani)}
   @media (min-width:640px){ .vol{display:flex} }
 
-  /* The player bar packs 8 fixed-size controls plus a text label onto one
-     non-wrapping row — on phones narrower than ~480px that needs more
-     width than the screen has, so items were spilling outside the pill
-     and overlapping each other instead of just being visible. Moving the
-     now-playing label to its own row above the controls gives the
-     buttons room to fit without changing anything on wider screens. */
+  /* Keep the exact same single-row layout as desktop on narrow phones too
+     — just scale everything down a notch so it actually fits on one line
+     instead of overflowing past the edge of the screen. */
   @media (max-width:480px){
     .player-bar{
-      flex-wrap:wrap;
-      justify-content:center;
-      max-width:96vw;
-      gap:8px;
-      padding:10px 12px;
+      max-width:97vw;
+      gap:6px;
+      padding:8px 10px;
     }
-    .nowbox{
-      order:-1;
-      flex:1 1 100%;
-      text-align:center;
-      margin-bottom:2px;
-    }
-    .nowbox .name{white-space:normal}
-    .visualizer{display:none}
+    .rnd{width:34px;height:34px}
+    .rnd.big{width:44px;height:44px}
+    .rnd:not(.big) svg{width:15px;height:15px}
+    .rnd.big svg{width:19px;height:19px}
+    #lyricsPlayerBtn, #sleepBtn{font-size:15px}
+    .visualizer{width:20px;height:18px;gap:2px}
+    .visualizer i{width:2px}
+    .nowbox{flex:0 1 60px}
+    .nowbox .label{font-size:9px}
+    .nowbox .name{font-size:13px}
   }
 
   /* ---------- stations bottom-sheet drawer ---------- */
