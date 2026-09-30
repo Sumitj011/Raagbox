@@ -739,6 +739,30 @@ const DEFAULT_STATIONS = [
   { en:"My Mix",       hi:"मेरा मिश्रण",      color:"#D93F87", playlist:"PLpiN_eoq4uoKcmojIbQ8iZRcvRTLtKUsK" }
 ];
 
+const MIX_STATION = { en:"All Shuffle", hi:"सब मिला के", color:"#3FB58A", mix:true, playlist:"" };
+let mixMode = false, lastMixKey = "";
+
+function ensureMixStation(){
+  stations = stations.filter(s => !s.mix);
+  stations.unshift({...MIX_STATION});
+}
+
+function pickMixStation(){
+  const pool = stations.filter(s => !s.mix && s.inMix !== false && playlistId(s.playlist));
+  if(!pool.length) return null;
+  const others = pool.length > 1 ? pool.filter(s => stationKey(s) !== lastMixKey) : pool;
+  const g = others[Math.floor(Math.random() * others.length)];
+  lastMixKey = stationKey(g);
+  return g;
+}
+
+function hopMix(){
+  const g = pickMixStation();
+  if(!g) return;
+  cmd("loadPlaylist", [{ list: playlistId(g.playlist), listType: "playlist", index: Math.floor(Math.random() * 10) }]);
+  setTimeout(() => cmd("setShuffle", [shuffleEnabled]), 800);
+}
+
 const KEY = "raagbox.stations.v1";
 const FAVORITES_KEY = "raagbox.favorites.v1";
 let favorites = [];
@@ -811,7 +835,7 @@ function load(){
   return DEFAULT_STATIONS.map(s => ({...s}));
 }
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(stations)); return true; }
+  try{ localStorage.setItem(KEY, JSON.stringify(stations.filter(s => !s.mix))); return true; }
   catch(e){ return false; }
 }
 
@@ -857,7 +881,7 @@ function setupMediaSessionHandlers(){
     cmd("pauseVideo"); playing = false; setPlayIcon(); setMediaSessionState("paused");
   });
   safe("previoustrack", () => cmd("previousVideo"));
-  safe("nexttrack", () => cmd("nextVideo"));
+  safe("nexttrack", () => mixMode ? hopMix() : cmd("nextVideo"));
 }
 
 /* ---------- player bridge (YouTube postMessage, no extra script) ---------- */
@@ -948,8 +972,9 @@ if(d && d.info && typeof d.info.playerState === "number"){
 
   // End of this song
   // YouTube state 0 = ended
-  if(d.info.playerState === 0 && sleepEndOfSong){
-    stopForSleep();
+  if(d.info.playerState === 0){
+    if(sleepEndOfSong) stopForSleep();
+    else if(mixMode) hopMix();
   }
 }
 });
@@ -1544,7 +1569,9 @@ function tune(i){
 
   document.documentElement.style.setProperty("--station-color", st.color || "#F2A93B");
 
-  const id = playlistId(st.playlist);
+  mixMode = !!st.mix;
+  let id = playlistId(st.playlist);
+  if(mixMode){ const g = pickMixStation(); id = g ? playlistId(g.playlist) : ""; }
   current = i;
   rememberRecent(st);
   renderStations();
@@ -1577,7 +1604,7 @@ function tune(i){
   $("empty").hidden = true;
   const f = $("player");
   f.hidden = false;
-  const start = 1 + Math.floor(Math.random() * 25);
+  const start = mixMode ? 1 + Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 25);
   f.src = "https://www.youtube-nocookie.com/embed/videoseries?list=" + encodeURIComponent(id) +
           "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
   playing = true; setPlayIcon(); setMediaSessionState("playing");
@@ -1615,7 +1642,7 @@ function renderStations(){
       '<span class="dot"></span>' +
       '<span class="bars"><i></i><i></i><i></i></span>' +
       '<div class="en"></div><div class="hi"></div>' +
-      (playlistId(s.playlist) ? "" : '<div class="off">playlist baaki hai</div>');
+      ((playlistId(s.playlist) || s.mix) ? "" : '<div class="off">playlist baaki hai</div>');
 
     b.querySelector(".en").textContent = s.en || "Untitled";
     b.querySelector(".hi").textContent = s.hi || "";
@@ -1710,7 +1737,7 @@ $("playBtn").addEventListener("click", () => {
   cmd(playing ? "pauseVideo" : "playVideo");
   playing = !playing; setPlayIcon(); setMediaSessionState(playing ? "playing" : "paused");
 });
-$("nextBtn").addEventListener("click", () => cmd("nextVideo"));
+$("nextBtn").addEventListener("click", () => mixMode ? hopMix() : cmd("nextVideo"));
 $("prevBtn").addEventListener("click", () => cmd("previousVideo"));
 let shuffleEnabled = false;
 
@@ -1821,7 +1848,7 @@ $("saveBtn").addEventListener("click", () => {
   setTimeout(() => $("saveBtn").textContent = "Save stations", 1600);
 });
 $("copyBtn").addEventListener("click", async () => {
-  const code = "const DEFAULT_STATIONS = " + JSON.stringify(stations, null, 2) + ";";
+  const code = "const DEFAULT_STATIONS = " + JSON.stringify(stations.filter(s => !s.mix), null, 2) + ";";
   const box = $("exportBox");
   box.hidden = false; box.value = code; box.select();
   try{ await navigator.clipboard.writeText(code); $("copyBtn").textContent = "Copied"; }
@@ -1830,6 +1857,7 @@ $("copyBtn").addEventListener("click", async () => {
 });
 $("resetBtn").addEventListener("click", () => {
   stations = DEFAULT_STATIONS.map(s => ({...s}));
+  ensureMixStation();
   save(); renderRows(); renderStations();
 });
 
@@ -1879,6 +1907,7 @@ const RI = (a,b) => Math.floor(R(a, b + 1));
 const pick = arr => arr[RI(0, arr.length - 1)];
 
 stations = load();
+ensureMixStation();
 renderStations();
 setPlayIcon();
 setupMediaSessionHandlers();
