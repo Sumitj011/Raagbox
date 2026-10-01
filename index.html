@@ -8,13 +8,21 @@
   <meta name="description"
     content="RaagBox plays Punjabi, Bollywood, Bhojpuri, Sufi and more as shuffled radio stations. Pick a genre, press play, no signup.">
   <meta name="theme-color" content="#16213E">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RaagBox">
   <meta property="og:title" content="RaagBox — desi radio, genre by genre">
   <meta property="og:description" content="Pick a genre, press play. Shuffled desi radio, no signup.">
   <meta property="og:type" content="website">
-  <script src="https://cdn.jsdelivr.net/npm/gurmukhi-utils@3.2.2/dist/index.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gurmukhi-utils@3.2.2/dist/index.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@300;400;600;800&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@300;400;600;800&family=Noto+Sans+Gurmukhi:wght@400;600&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -125,6 +133,18 @@
       background-repeat: no-repeat;
     }
 
+    /* On tall/narrow screens, background-size:cover crops this wide painting
+   down to a thin centered vertical strip — centered at 50% that strip
+   only contained the person's legs, cropping the face/torso/radio out
+   entirely. Shifting the focal point right keeps the whole figure and
+   radio in frame. Wide/desktop viewports crop top/bottom instead of
+   left/right, so they're unaffected and stay at dead-center. */
+    @media (max-width:700px) {
+      #wall {
+        background-position: 68% center;
+      }
+    }
+
     .scrim {
       position: absolute;
       inset: 0;
@@ -229,9 +249,9 @@
     }
 
     .chip {
-      background: rgba(8, 13, 28, .45);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(8, 13, 28, .6);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       border: 1px solid rgba(246, 237, 221, .28);
       color: #F6EDDD;
       border-radius: 999px;
@@ -325,9 +345,9 @@
       align-items: center;
       gap: 12px;
       max-width: 94vw;
-      background: rgba(8, 13, 28, .55);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(8, 13, 28, .28);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid rgba(246, 237, 221, .2);
       border-radius: 22px;
       padding: 10px 14px;
@@ -532,6 +552,64 @@
       }
     }
 
+    /* Keep the exact same single-row layout as desktop on narrow phones too
+     — just scale everything down a notch so it actually fits on one line
+     instead of overflowing past the edge of the screen. */
+    @media (max-width:480px) {
+      .player-bar {
+        max-width: 97vw;
+        gap: 6px;
+        padding: 8px 10px;
+      }
+
+      .rnd {
+        width: 34px;
+        height: 34px
+      }
+
+      .rnd.big {
+        width: 44px;
+        height: 44px
+      }
+
+      .rnd:not(.big) svg {
+        width: 15px;
+        height: 15px
+      }
+
+      .rnd.big svg {
+        width: 19px;
+        height: 19px
+      }
+
+      #lyricsPlayerBtn,
+      #sleepBtn {
+        font-size: 15px
+      }
+
+      .visualizer {
+        width: 20px;
+        height: 18px;
+        gap: 2px
+      }
+
+      .visualizer i {
+        width: 2px
+      }
+
+      .nowbox {
+        flex: 0 1 60px
+      }
+
+      .nowbox .label {
+        font-size: 9px
+      }
+
+      .nowbox .name {
+        font-size: 13px
+      }
+    }
+
     /* ---------- stations bottom-sheet drawer ---------- */
     .drawer-backdrop {
       position: fixed;
@@ -554,7 +632,7 @@
       max-height: 72dvh;
       overflow: auto;
       background: rgba(12, 18, 38, .94);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(6px);
       border-top-left-radius: 24px;
       border-top-right-radius: 24px;
       padding: 18px 18px calc(24px + env(safe-area-inset-bottom));
@@ -1132,27 +1210,113 @@
         transform: scale(1.04);
       }
     }
-  
-/* ---------- welcome + credit + sleep button ---------- */
-.welcome{position:absolute;left:50%;top:18%;transform:translateX(-50%);z-index:5;width:min(92%,640px);text-align:center;color:#F6EDDD;text-shadow:0 3px 16px rgba(0,0,0,.7)}
-.welcome[hidden]{display:none}
-.welcome .w-title{font-family:"Yatra One",cursive;font-size:clamp(26px,5.5vw,44px);line-height:1.2}
-.welcome p{margin:10px auto 0;font-size:clamp(14px,2.6vw,17px);opacity:.9;max-width:40ch}
-.welcome button{margin-top:16px}
-.made{position:absolute;z-index:5;left:18px;top:calc(66px + env(safe-area-inset-top));font-size:12px;color:rgba(246,237,221,.85);text-shadow:0 2px 8px rgba(0,0,0,.7);pointer-events:none}
-.made .heart{color:#E0457B;display:inline-block;animation:beat 1.4s ease-in-out infinite}
-@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
-@media (prefers-reduced-motion: reduce){.made .heart{animation:none}}
-#sleepBtn{width:auto;min-width:42px;padding:0 10px;border-radius:999px;font-size:13px;white-space:nowrap}
-@media (max-width:480px){#sleepBtn{min-width:34px;padding:0 8px;font-size:12px}}
-</style>
+
+    /* ---------- welcome + credit + sleep button ---------- */
+    .welcome {
+      position: absolute;
+      left: 50%;
+      top: 18%;
+      transform: translateX(-50%);
+      z-index: 5;
+      width: min(92%, 640px);
+      text-align: center;
+      color: #F6EDDD;
+      text-shadow: 0 3px 16px rgba(0, 0, 0, .7)
+    }
+
+    .welcome[hidden] {
+      display: none
+    }
+
+    .welcome .w-title {
+      font-family: "Yatra One", cursive;
+      font-size: clamp(26px, 5.5vw, 44px);
+      line-height: 1.2
+    }
+
+    .welcome p {
+      margin: 10px auto 0;
+      font-size: clamp(14px, 2.6vw, 17px);
+      opacity: .9;
+      max-width: 40ch
+    }
+
+    .welcome button {
+      margin-top: 16px
+    }
+
+    .welcome .w-title .t {
+      position: relative;
+      display: inline-block
+    }
+
+    .welcome .w-title .emo {
+      position: absolute;
+      left: 100%;
+      top: 0;
+      margin-left: .3em;
+      white-space: nowrap
+    }
+
+    .made {
+      position: absolute;
+      z-index: 5;
+      left: 18px;
+      top: calc(66px + env(safe-area-inset-top));
+      font-size: 12px;
+      color: rgba(246, 237, 221, .85);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .7);
+      pointer-events: none
+    }
+
+    .made .heart {
+      color: #E0457B;
+      display: inline-block;
+      animation: beat 1.4s ease-in-out infinite
+    }
+
+    @keyframes beat {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.25)
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .made .heart {
+        animation: none
+      }
+    }
+
+    #sleepBtn {
+      width: auto;
+      min-width: 42px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap
+    }
+
+    @media (max-width:480px) {
+      #sleepBtn {
+        min-width: 34px;
+        padding: 0 8px;
+        font-size: 12px
+      }
+    }
+  </style>
 </head>
 
 <body>
 
   <div class="stage">
-    <iframe id="player" referrerpolicy="strict-origin-when-cross-origin" title="RaagBox player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
-      hidden></iframe>
+    <iframe id="player" referrerpolicy="strict-origin-when-cross-origin" title="RaagBox player"
+      allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
     <div id="wall" aria-hidden="true"></div>
     <div class="scrim" aria-hidden="true"></div>
     <div class="station-tint" id="stationTint" aria-hidden="true"></div>
@@ -1172,21 +1336,19 @@
         <h1><span class="hi">रागबॉक्स</span>RaagBox</h1>
       </div>
       <div class="hud-actions">
+        <button class="chip" id="loginBtn" hidden>Login</button>
         <button class="chip" id="stationsBtn" aria-expanded="false">Stations</button>
         <button class="chip" id="themeBtn">Light / dark</button>
         <button class="chip" id="ownerBtn" aria-expanded="false">Manage</button>
       </div>
     </header>
-<div class="welcome" id="welcome">
-  <div class="w-title">Hey, sunshine 😎</div>
-  <p>
-    How’s your day going?<br>
-    Whatever you’re feeling today,<br>
-    come in. I’ve got music for you. 🎶
-  </p>
-  <button class="chip" id="welcomeBtn">🎧 Gaana chuno</button>
-</div>
-  <div class="made">Made with <span class="heart">♥</span> by <b>Spirit 😎</b></div>
+
+    <div class="welcome" id="welcome">
+      <div class="w-title"><span class="t">Hey, sunshine<span class="emo">😎</span></span></div>
+      <p>How’s your day going?<br>Whatever you’re feeling today,<br>come in. I’ve got music for you. 🎶</p>
+      <button class="chip" id="welcomeBtn">🎧 Gaana chuno</button>
+    </div>
+    <div class="made">Made with <span class="heart">♥</span> by <b>Spirit</b> 😎</div>
 
     <div id="nowCard" hidden>
       <div id="nowTitle">RaagBox</div>
@@ -1253,38 +1415,40 @@
       </div>
     </div>
 
-  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
-  <section class="drawer" id="stationsDrawer" hidden>
-    <div class="drawer-handle"></div>
-    <div class="sechead">
-      <h2>Stations</h2>
-      <button class="fav-filter" id="favFilterBtn" aria-pressed="false">♥ Favorites</button>
-    </div>
-    <p class="hint">Shuffle ON karo to gaane random order mein chalenge.</p>
-    <div id="recentStations" class="recent-stations"></div>
-    <div class="stations" id="stations"></div>
-    <p class="drawer-credit">RaagBox — gaane YouTube se chalte hain. Koi signup nahi.</p>
-  </section>
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <section class="drawer" id="stationsDrawer" hidden>
+      <div class="drawer-handle"></div>
+      <div class="sechead">
+        <h2>Stations</h2>
+        <button class="fav-filter" id="favFilterBtn" aria-pressed="false">♥ Favorites</button>
+      </div>
+      <p class="hint">Shuffle ON karo to gaane random order mein chalenge.</p>
+      <div id="recentStations" class="recent-stations"></div>
+      <div class="stations" id="stations"></div>
+      <p class="drawer-credit">RaagBox — gaane YouTube se chalte hain. Koi signup nahi.</p>
+    </section>
 
-  <section class="panel" id="panel" hidden>
-    <div class="panel-card">
-      <div class="panel-head">
-        <h2>Manage stations</h2>
-        <button class="ghost" id="closePanel">Close</button>
+    <section class="panel" id="panel" hidden>
+      <div class="panel-card">
+        <div class="panel-head">
+          <h2>Manage stations</h2>
+          <button class="ghost" id="closePanel">Close</button>
+        </div>
+        <p class="note">Naam, rang aur YouTube playlist link edit karo. Save karne se ye isi browser me rakha jaata hai.
+          Sabke liye permanent karna ho to "Copy config" dabao aur code ke <code>DEFAULT_STATIONS</code> me paste kar
+          do.</p>
+        <div id="rows"></div>
+        <div class="acts">
+          <button class="ghost" id="addRow">Add station</button>
+          <button class="solid" id="saveBtn">Save stations</button>
+          <button class="ghost" id="copyBtn">Copy config</button>
+          <button class="ghost" id="exportCodeBtn">Export code</button>
+          <button class="ghost" id="importCodeBtn">Import code</button>
+          <button class="ghost" id="resetBtn">Reset to default</button>
+        </div>
+        <textarea id="exportBox" hidden readonly aria-label="Station config"></textarea>
       </div>
-      <p class="note">Naam, rang aur YouTube playlist link edit karo. Save karne se ye isi browser me rakha jaata hai.
-        Sabke liye permanent karna ho to "Copy config" dabao aur code ke <code>DEFAULT_STATIONS</code> me paste kar do.
-      </p>
-      <div id="rows"></div>
-      <div class="acts">
-        <button class="ghost" id="addRow">Add station</button>
-        <button class="solid" id="saveBtn">Save stations</button>
-        <button class="ghost" id="copyBtn">Copy config</button>
-        <button class="ghost" id="resetBtn">Reset to default</button>
-      </div>
-      <textarea id="exportBox" hidden readonly aria-label="Station config"></textarea>
-    </div>
-  </section>
+    </section>
   </div>
 
   <script>
@@ -1293,14 +1457,38 @@
        playlist: YouTube playlist ka link ya sirf ID (PL... se shuru).
        ============================================================ */
     const DEFAULT_STATIONS = [
-      { en: "Her_R", hi: "उसकी यादें", color: "#7B5EA7", playlist: "PLpiN_eoq4uoLyc6AwyWl84GWl1vR46PcX" },
-      { en: "Bollywood Olds", hi: "सदाबहार पुराने", color: "#F2A93B", playlist: "PLpiN_eoq4uoI8HDncOZ7a1z6ociZeZt9r" },
-      { en: "Punjabi", hi: "ਪੰਜਾਬੀ", color: "#E0457B", playlist: "PLFFyMei_d85XtKpbefBYEKfRtYcttsjyh" },
-      { en: "Blues", hi: "अंतर्मन के सुर ", color: "#C9482A", playlist: "PLpiN_eoq4uoL9ozLAmL8XUs5XQHAFCCV-" },
-      { en: "Bhajans", hi: "भक्ति-रस", color: "#2E7FA8", playlist: "PLpiN_eoq4uoIMFCMGY3_nG19vvbffbc7J" },
-      { en: "Ghazal", hi: "ग़ज़ल", color: "#9B7B2F", playlist: "PLlgtUI5-ajb5Z1cJY0YNNr9oukdSQ4SCU" },
-      { en: "My Mix", hi: "मेरा मिश्रण", color: "#D93F87", playlist: "PLpiN_eoq4uoKcmojIbQ8iZRcvRTLtKUsK" }
+      {en: "Her_R", hi: "उसकी यादें", color: "#7B5EA7", playlist: "PLpiN_eoq4uoLyc6AwyWl84GWl1vR46PcX"},
+      {en: "Bollywood Olds", hi: "सदाबहार पुराने", color: "#F2A93B", playlist: "PLpiN_eoq4uoI8HDncOZ7a1z6ociZeZt9r"},
+      {en: "Punjabi", hi: "ਪੰਜਾਬੀ", color: "#E0457B", playlist: "PLFFyMei_d85XtKpbefBYEKfRtYcttsjyh"},
+      {en: "Blues", hi: "अंतर्मन के सुर ", color: "#C9482A", playlist: "PLpiN_eoq4uoL9ozLAmL8XUs5XQHAFCCV-"},
+      {en: "Bhajans", hi: "भक्ति-रस", color: "#2E7FA8", playlist: "PLpiN_eoq4uoIMFCMGY3_nG19vvbffbc7J"},
+      {en: "Ghazal", hi: "ग़ज़ल", color: "#9B7B2F", playlist: "PLlgtUI5-ajb5Z1cJY0YNNr9oukdSQ4SCU"},
+      {en: "My Mix", hi: "मेरा मिश्रण", color: "#D93F87", playlist: "PLpiN_eoq4uoKcmojIbQ8iZRcvRTLtKUsK"}
     ];
+
+    const MIX_STATION = {en: "All Shuffle", hi: "सब मिला के", color: "#3FB58A", mix: true, playlist: ""};
+    let mixMode = false, lastMixKey = "";
+
+    function ensureMixStation() {
+      stations = stations.filter(s => !s.mix);
+      stations.unshift({...MIX_STATION});
+    }
+
+    function pickMixStation() {
+      const pool = stations.filter(s => !s.mix && s.inMix !== false && playlistId(s.playlist));
+      if (!pool.length) return null;
+      const others = pool.length > 1 ? pool.filter(s => stationKey(s) !== lastMixKey) : pool;
+      const g = others[Math.floor(Math.random() * others.length)];
+      lastMixKey = stationKey(g);
+      return g;
+    }
+
+    function hopMix() {
+      const g = pickMixStation();
+      if (!g) return;
+      cmd("loadPlaylist", [{list: playlistId(g.playlist), listType: "playlist", index: Math.floor(Math.random() * 10)}]);
+      setTimeout(() => cmd("setShuffle", [shuffleEnabled]), 800);
+    }
 
     const KEY = "raagbox.stations.v1";
     const FAVORITES_KEY = "raagbox.favorites.v1";
@@ -1317,6 +1505,10 @@
       }
     } catch (e) { }
 
+    // Cloud sync hook (cloud module isko replace karta hai jab user login ho)
+    let cloudPush = () => { };
+    function afterLocalChange() {try {cloudPush();} catch (e) { } }
+
     function rememberRecent(s) {
       const key = stationKey(s);
 
@@ -1328,6 +1520,7 @@
       try {
         localStorage.setItem(RECENT_KEY, JSON.stringify(recentStations));
       } catch (e) { }
+      afterLocalChange();
     }
 
     try {
@@ -1358,6 +1551,7 @@
       try {
         localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
       } catch (e) { }
+      afterLocalChange();
 
       renderStations();
     }
@@ -1369,13 +1563,13 @@
     function load() {
       try {
         const raw = localStorage.getItem(KEY);
-        if (raw) { const p = JSON.parse(raw); if (Array.isArray(p) && p.length) return p; }
+        if (raw) {const p = JSON.parse(raw); if (Array.isArray(p) && p.length) return p;}
       } catch (e) { }
-      return DEFAULT_STATIONS.map(s => ({ ...s }));
+      return DEFAULT_STATIONS.map(s => ({...s}));
     }
     function save() {
-      try { localStorage.setItem(KEY, JSON.stringify(stations)); return true; }
-      catch (e) { return false; }
+      try {localStorage.setItem(KEY, JSON.stringify(stations.filter(s => !s.mix))); afterLocalChange(); return true;}
+      catch (e) {return false;}
     }
 
     /* ---------- helpers ---------- */
@@ -1400,47 +1594,47 @@
           artist: artist || "RaagBox Radio",
           album: "RaagBox",
           artwork: [
-            { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='512' height='512' fill='%23F2A93B'/><circle cx='256' cy='256' r='150' fill='none' stroke='%2316213E' stroke-width='18'/><line x1='256' y1='256' x2='256' y2='140' stroke='%23E0457B' stroke-width='14' stroke-linecap='round'/></svg>", sizes: "512x512", type: "image/svg+xml" }
+            {src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='512' height='512' fill='%23F2A93B'/><circle cx='256' cy='256' r='150' fill='none' stroke='%2316213E' stroke-width='18'/><line x1='256' y1='256' x2='256' y2='140' stroke='%23E0457B' stroke-width='14' stroke-linecap='round'/></svg>", sizes: "512x512", type: "image/svg+xml"}
           ]
         });
       } catch (e) { }
     }
     function setMediaSessionState(state) {
       if (!('mediaSession' in navigator)) return;
-      try { navigator.mediaSession.playbackState = state; } catch (e) { }
+      try {navigator.mediaSession.playbackState = state;} catch (e) { }
     }
     function setupMediaSessionHandlers() {
       if (!('mediaSession' in navigator)) return;
-      const safe = (name, fn) => { try { navigator.mediaSession.setActionHandler(name, fn); } catch (e) { } };
+      const safe = (name, fn) => {try {navigator.mediaSession.setActionHandler(name, fn);} catch (e) { } };
       safe("play", () => {
-        if ($("player").hidden) { $("playBtn").click(); return; }
+        if ($("player").hidden) {$("playBtn").click(); return;}
         cmd("playVideo"); playing = true; setPlayIcon(); setMediaSessionState("playing");
       });
       safe("pause", () => {
         cmd("pauseVideo"); playing = false; setPlayIcon(); setMediaSessionState("paused");
       });
       safe("previoustrack", () => cmd("previousVideo"));
-      safe("nexttrack", () => cmd("nextVideo"));
+      safe("nexttrack", () => mixMode ? hopMix() : cmd("nextVideo"));
     }
 
     /* ---------- player bridge (YouTube postMessage, no extra script) ---------- */
     function cmd(func, args) {
       const f = $("player");
       if (!f || f.hidden || !f.contentWindow) return;
-      f.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: args || [], id: 1, channel: "raagbox" }), "*");
+      f.contentWindow.postMessage(JSON.stringify({event: "command", func, args: args || [], id: 1, channel: "raagbox"}), "*");
     }
     function startHandshake() {
       clearInterval(hs);
       const f = $("player");
       let n = 0;
       hs = setInterval(() => {
-        if (!f.contentWindow || ++n > 40) { clearInterval(hs); return; }
-        f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "raagbox" }), "*");
+        if (!f.contentWindow || ++n > 40) {clearInterval(hs); return;}
+        f.contentWindow.postMessage(JSON.stringify({event: "listening", id: 1, channel: "raagbox"}), "*");
       }, 400);
     }
     window.addEventListener("message", e => {
       let host = "";
-      try { host = new URL(e.origin).hostname; } catch (_) { return; }
+      try {host = new URL(e.origin).hostname;} catch (_) {return;}
       if (!/(^|\.)youtube(-nocookie)?\.com$/.test(host)) return;
 
       let d;
@@ -1518,8 +1712,9 @@
 
         // End of this song
         // YouTube state 0 = ended
-        if (d.info.playerState === 0 && sleepEndOfSong) {
-          stopForSleep();
+        if (d.info.playerState === 0) {
+          if (sleepEndOfSong) stopForSleep();
+          else if (mixMode) hopMix();
         }
       }
     });
@@ -1637,7 +1832,7 @@
       const gurmukhiCount = (text.match(/[\u0A00-\u0A7F]/g) || []).length;
       const latinCount = (text.match(/[A-Za-z]/g) || []).length;
 
-      const counts = { arabic: arabicCount, devanagari: devanagariCount, gurmukhi: gurmukhiCount, latin: latinCount };
+      const counts = {arabic: arabicCount, devanagari: devanagariCount, gurmukhi: gurmukhiCount, latin: latinCount};
       const top = Object.keys(counts).reduce((a, b) => counts[a] >= counts[b] ? a : b);
 
       return counts[top] > 0 ? top : "unknown";
@@ -1685,6 +1880,7 @@
       const lineCount = body.split("\n").filter(Boolean).length;
       score += Math.min(lineCount / 40, 1) * 0.06;
 
+
       return score;
     }
 
@@ -1698,7 +1894,7 @@
         const key = trackName.toLowerCase() + "||" + String(artistName || "").toLowerCase();
         if (seen.has(key)) return;
         seen.add(key);
-        candidates.push({ track_name: trackName, artist_name: artistName || "" });
+        candidates.push({track_name: trackName, artist_name: artistName || ""});
       }
 
       addCandidate(info.song, info.artist);
@@ -1727,7 +1923,7 @@
       }
 
       const info = extractSongArtist(title, meta);
-  info.duration = latestDuration;
+      info.duration = latestDuration;
 
       console.log("Lyrics detection:", info);
 
@@ -2028,10 +2224,10 @@
 
           activeLyrics = parseSyncedLyrics(result.syncedLyrics);
 
-      const plainCount = (result.plainLyrics || "").split("\n").filter(l => l.trim()).length;
-      if(activeLyrics.length && plainCount > activeLyrics.length * 1.6){
-        activeLyrics = []; // synced adhoora hai, poora plain dikhao
-      }
+          const plainCount = (result.plainLyrics || "").split("\n").filter(l => l.trim()).length;
+          if (activeLyrics.length && plainCount > activeLyrics.length * 1.6) {
+            activeLyrics = []; // synced adhoora hai, poora plain dikhao
+          }
 
           if (activeLyrics.length) {
             text.innerHTML = activeLyrics.map((line, index) => `
@@ -2132,7 +2328,9 @@
 
       document.documentElement.style.setProperty("--station-color", st.color || "#F2A93B");
 
-      const id = playlistId(st.playlist);
+      mixMode = !!st.mix;
+      let id = playlistId(st.playlist);
+      if (mixMode) {const g = pickMixStation(); id = g ? playlistId(g.playlist) : "";}
       current = i;
       rememberRecent(st);
       renderStations();
@@ -2165,7 +2363,7 @@
       $("empty").hidden = true;
       const f = $("player");
       f.hidden = false;
-      const start = 1 + Math.floor(Math.random() * 25);
+      const start = mixMode ? 1 + Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 25);
       f.src = "https://www.youtube-nocookie.com/embed/videoseries?list=" + encodeURIComponent(id) +
         "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
       playing = true; setPlayIcon(); setMediaSessionState("playing");
@@ -2203,7 +2401,7 @@
           '<span class="dot"></span>' +
           '<span class="bars"><i></i><i></i><i></i></span>' +
           '<div class="en"></div><div class="hi"></div>' +
-          (playlistId(s.playlist) ? "" : '<div class="off">playlist baaki hai</div>');
+          ((playlistId(s.playlist) || s.mix) ? "" : '<div class="off">playlist baaki hai</div>');
 
         b.querySelector(".en").textContent = s.en || "Untitled";
         b.querySelector(".hi").textContent = s.hi || "";
@@ -2286,7 +2484,7 @@
         col.addEventListener("input", e => s.color = e.target.value);
         r.querySelector(".del").addEventListener("click", () => {
           stations.splice(i, 1);
-          if (current === i) { current = -1; $("player").hidden = true; $("empty").hidden = false; $("nowName").textContent = "—"; }
+          if (current === i) {current = -1; $("player").hidden = true; $("empty").hidden = false; $("nowName").textContent = "—";}
           else if (i < current) current--;
           renderRows(); renderStations();
         });
@@ -2296,11 +2494,11 @@
 
     /* ---------- wiring ---------- */
     $("playBtn").addEventListener("click", () => {
-      if ($("player").hidden) { const first = stations.findIndex(s => playlistId(s.playlist)); if (first > -1) tune(first); return; }
+      if ($("player").hidden) {const first = stations.findIndex(s => playlistId(s.playlist)); if (first > -1) tune(first); return;}
       cmd(playing ? "pauseVideo" : "playVideo");
       playing = !playing; setPlayIcon(); setMediaSessionState(playing ? "playing" : "paused");
     });
-    $("nextBtn").addEventListener("click", () => cmd("nextVideo"));
+    $("nextBtn").addEventListener("click", () => mixMode ? hopMix() : cmd("nextVideo"));
     $("prevBtn").addEventListener("click", () => cmd("previousVideo"));
     let shuffleEnabled = false;
 
@@ -2384,9 +2582,9 @@
       $("panel").hidden = true;
       $("ownerBtn").setAttribute("aria-expanded", "false");
     }
-    $("ownerBtn").addEventListener("click", () => { $("panel").hidden ? openPanel() : closePanel(); });
+    $("ownerBtn").addEventListener("click", () => {$("panel").hidden ? openPanel() : closePanel();});
     $("closePanel").addEventListener("click", closePanel);
-    $("panel").addEventListener("click", e => { if (e.target === $("panel")) closePanel(); });
+    $("panel").addEventListener("click", e => {if (e.target === $("panel")) closePanel();});
 
     function openDrawer() {
       $("stationsDrawer").hidden = false;
@@ -2398,11 +2596,11 @@
       $("drawerBackdrop").hidden = true;
       $("stationsBtn").setAttribute("aria-expanded", "false");
     }
-    $("stationsBtn").addEventListener("click", () => { $("stationsDrawer").hidden ? openDrawer() : closeDrawer(); });
+    $("stationsBtn").addEventListener("click", () => {$("stationsDrawer").hidden ? openDrawer() : closeDrawer();});
     $("drawerBackdrop").addEventListener("click", closeDrawer);
-$("welcomeBtn").addEventListener("click", openDrawer);
+    $("welcomeBtn").addEventListener("click", openDrawer);
     $("addRow").addEventListener("click", () => {
-      stations.push({ en: "New station", hi: "", color: "#F2A93B", playlist: "" });
+      stations.push({en: "New station", hi: "", color: "#F2A93B", playlist: ""});
       renderRows(); renderStations();
     });
     $("saveBtn").addEventListener("click", () => {
@@ -2412,15 +2610,16 @@ $("welcomeBtn").addEventListener("click", openDrawer);
       setTimeout(() => $("saveBtn").textContent = "Save stations", 1600);
     });
     $("copyBtn").addEventListener("click", async () => {
-      const code = "const DEFAULT_STATIONS = " + JSON.stringify(stations, null, 2) + ";";
+      const code = "const DEFAULT_STATIONS = " + JSON.stringify(stations.filter(s => !s.mix), null, 2) + ";";
       const box = $("exportBox");
       box.hidden = false; box.value = code; box.select();
-      try { await navigator.clipboard.writeText(code); $("copyBtn").textContent = "Copied"; }
-      catch (e) { $("copyBtn").textContent = "Neeche se copy karo"; }
+      try {await navigator.clipboard.writeText(code); $("copyBtn").textContent = "Copied";}
+      catch (e) {$("copyBtn").textContent = "Neeche se copy karo";}
       setTimeout(() => $("copyBtn").textContent = "Copy config", 2000);
     });
     $("resetBtn").addEventListener("click", () => {
-      stations = DEFAULT_STATIONS.map(s => ({ ...s }));
+      stations = DEFAULT_STATIONS.map(s => ({...s}));
+      ensureMixStation();
       save(); renderRows(); renderStations();
     });
 
@@ -2455,13 +2654,13 @@ $("welcomeBtn").addEventListener("click", openDrawer);
 
     document.addEventListener("keydown", e => {
       if (/input|textarea/i.test(e.target.tagName)) return;
-      if (e.code === "Space") { if (e.target.closest("button")) return; e.preventDefault(); $("playBtn").click(); }
+      if (e.code === "Space") {if (e.target.closest("button")) return; e.preventDefault(); $("playBtn").click();}
       if (e.code === "ArrowRight") $("nextBtn").click();
       if (e.code === "ArrowLeft") $("prevBtn").click();
     });
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") { closeDrawer(); closePanel(); $("sleepMenu").hidden = true; }
+      if (e.key === "Escape") {closeDrawer(); closePanel(); $("sleepMenu").hidden = true;}
     });
     document.addEventListener("click", e => {
       if (!e.target.closest("#sleepMenu, #sleepBtn")) $("sleepMenu").hidden = true;
@@ -2477,9 +2676,200 @@ $("welcomeBtn").addEventListener("click", openDrawer);
     const pick = arr => arr[RI(0, arr.length - 1)];
 
     stations = load();
+    ensureMixStation();
     renderStations();
     setPlayIcon();
     setupMediaSessionHandlers();
+
+    /* ---------- RB API: cloud sync + export/import ---------- */
+    function sanitizeStations(list) {
+      if (!Array.isArray(list)) return [];
+      return list.filter(x => x && typeof x === "object" && !x.mix).slice(0, 60).map(x => ({
+        en: String(x.en || "").slice(0, 60),
+        hi: String(x.hi || "").slice(0, 60),
+        color: /^#[0-9a-f]{6}$/i.test(x.color || "") ? x.color : "#F2A93B",
+        playlist: String(x.playlist || "").slice(0, 300),
+        ...(x.inMix === false ? {inMix: false} : {})
+      }));
+    }
+
+    function writeLocalState() {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(stations.filter(s => !s.mix)));
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+        localStorage.setItem(RECENT_KEY, JSON.stringify(recentStations));
+      } catch (e) { }
+    }
+
+    function refreshAfterStateChange(prevKey) {
+      const idx = prevKey ? stations.findIndex(s => stationKey(s) === prevKey) : -1;
+      current = idx;
+      renderStations();
+      if (!$("panel").hidden) renderRows();
+    }
+
+    window.RB = {
+      getState() {
+        return {stations: stations.filter(s => !s.mix), favorites, recent: recentStations};
+      },
+      applyState(st) {
+        if (!st) return;
+        const prevKey = current > -1 && stations[current] ? stationKey(stations[current]) : "";
+        const list = sanitizeStations(st.stations);
+        stations = list.length ? list : DEFAULT_STATIONS.map(x => ({...x}));
+        ensureMixStation();
+        favorites = Array.isArray(st.favorites) ? st.favorites.map(String) : [];
+        recentStations = Array.isArray(st.recent) ? st.recent.map(String).slice(0, 5) : [];
+        writeLocalState();
+        refreshAfterStateChange(prevKey);
+      },
+      resetToDefaults() {
+        const prevKey = current > -1 && stations[current] ? stationKey(stations[current]) : "";
+        stations = DEFAULT_STATIONS.map(x => ({...x}));
+        ensureMixStation();
+        favorites = [];
+        recentStations = [];
+        try {
+          localStorage.removeItem(KEY);
+          localStorage.removeItem(FAVORITES_KEY);
+          localStorage.removeItem(RECENT_KEY);
+        } catch (e) { }
+        refreshAfterStateChange(prevKey);
+      },
+      setPush(fn) {cloudPush = typeof fn === "function" ? fn : () => { };}
+    };
+
+    function encodeState() {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(window.RB.getState()))));
+    }
+    function decodeState(code) {
+      return JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    }
+
+    $("exportCodeBtn").addEventListener("click", async () => {
+      const box = $("exportBox");
+      box.hidden = false;
+      box.value = encodeState();
+      box.select();
+      try {await navigator.clipboard.writeText(box.value); $("exportCodeBtn").textContent = "Copied";}
+      catch (e) {$("exportCodeBtn").textContent = "Neeche se copy karo";}
+      setTimeout(() => $("exportCodeBtn").textContent = "Export code", 2000);
+    });
+
+    $("importCodeBtn").addEventListener("click", () => {
+      const code = prompt("Dusre device se copy kiya hua code yahan paste karo:");
+      if (!code) return;
+      try {
+        window.RB.applyState(decodeState(code));
+        save();
+        $("importCodeBtn").textContent = "Imported";
+      } catch (e) {
+        alert("Ye code sahi nahi lag raha. Poora code dobara copy karke try karo.");
+        $("importCodeBtn").textContent = "Import nahi hua";
+      }
+      setTimeout(() => $("importCodeBtn").textContent = "Import code", 2000);
+    });
+
+    // Registering this makes the browser treat RaagBox as an installable app
+    // (Chrome's "Add to Home Screen" / "Install app" prompt on Android).
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(err => {
+          console.warn("Service worker registration failed:", err);
+        });
+      });
+    }
+
+  </script>
+
+  <script type="module">
+    /* ============================================================
+       Cloud login + sync (Firebase). Jab tak FIREBASE_CONFIG khaali hai,
+       Login button chhupa rehta hai aur site pehle jaisi hi chalti hai.
+       Firebase console > Project settings > Your apps > Web app se
+       config copy karke yahan paste karo.
+       ============================================================ */
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCyrEFA3Pao_nv9X0clGi6L2Nb5bcfIyYg",
+      authDomain: "raagbox-0716.firebaseapp.com",
+      projectId: "raagbox-0716",
+      appId: "1:986202769336:web:590173639ffcfed6f9314d"
+    };
+
+    if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId) {
+      try {
+        const V = "10.12.2";
+        const [{initializeApp}, A, F] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/" + V + "/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/" + V + "/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/" + V + "/firebase-firestore.js")
+        ]);
+
+        const app = initializeApp(FIREBASE_CONFIG);
+        const auth = A.getAuth(app);
+        const db = F.getFirestore(app);
+        const btn = document.getElementById("loginBtn");
+        btn.hidden = false;
+
+        let uid = null, wasLoggedIn = false, pushTimer = null;
+
+        const userDoc = () => F.doc(db, "users", uid);
+
+        async function pushNow() {
+          if (!uid) return;
+          const state = JSON.parse(JSON.stringify(window.RB.getState()));
+          await F.setDoc(userDoc(), {...state, updatedAt: F.serverTimestamp()});
+        }
+        function schedulePush() {
+          clearTimeout(pushTimer);
+          pushTimer = setTimeout(() => pushNow().catch(e => console.warn("Cloud save failed:", e)), 1200);
+        }
+
+        A.onAuthStateChanged(auth, async user => {
+          if (user) {
+            uid = user.uid;
+            btn.textContent = "\u2601 " + ((user.displayName || "Account").split(" ")[0]).slice(0, 12);
+            btn.title = "Logout";
+            try {
+              const snap = await F.getDoc(userDoc());
+              if (snap.exists()) window.RB.applyState(snap.data());
+              else await pushNow();
+            } catch (e) {console.warn("Cloud load failed:", e);}
+            window.RB.setPush(schedulePush);
+            wasLoggedIn = true;
+          } else {
+            uid = null;
+            clearTimeout(pushTimer);
+            window.RB.setPush(null);
+            btn.textContent = "Login";
+            btn.title = "Google se login karo";
+            if (wasLoggedIn) window.RB.resetToDefaults();
+            wasLoggedIn = false;
+          }
+        });
+
+        btn.addEventListener("click", async () => {
+          if (uid) {
+            if (confirm("Logout karoge? Is device par stations default ho jayenge. Tumhara data cloud mein safe rahega.")) {
+              await A.signOut(auth);
+            }
+            return;
+          }
+          try {
+            await A.signInWithPopup(auth, new A.GoogleAuthProvider());
+          } catch (e) {
+            if (e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment")) {
+              A.signInWithRedirect(auth, new A.GoogleAuthProvider());
+            } else if (e && e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+              console.warn("Login failed:", e);
+              alert("Login nahi ho paya. Console mein error dekho (domain authorized hai?).");
+            }
+          }
+        });
+      } catch (e) {
+        console.warn("Firebase setup failed:", e);
+      }
+    }
   </script>
 </body>
 
