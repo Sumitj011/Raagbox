@@ -1554,6 +1554,8 @@
     // Playlist lengths learned from the player, so All Shuffle can load a
     // random song in ONE step (no "starts, then skips to another song").
     const playlistLengths = {};
+    const playlistVideos = {};   // playlist id -> array of video ids (learned from the player)
+    let mixHistory = [];         // videos played in All Shuffle (for Previous)
     let currentListId = "", lastSwitchAt = 0;
 
     function hopMix() {
@@ -1562,6 +1564,19 @@
       const id = playlistId(g.playlist);
       currentListId = id;
       lastSwitchAt = performance.now();
+
+      // Smooth path: we already know this playlist's video ids, so just play
+      // one random video directly. No playlist reload, no skipping.
+      const vids = playlistVideos[id];
+      if (vids && vids.length) {
+        const v = vids[Math.floor(Math.random() * vids.length)];
+        mixHistory.push(v);
+        if (mixHistory.length > 50) mixHistory.shift();
+        clearTimeout(randomStartTimer); pendingRandomStart = false;
+        cmd("loadVideoById", [{videoId: v}]);
+        return;
+      }
+
       const known = playlistLengths[id];
       // All Shuffle already picks a random playlist + random song itself,
       // so we do NOT call setShuffle here (it restarts the playlist and
@@ -1763,6 +1778,7 @@
       if (currentListId && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1 &&
         performance.now() - lastSwitchAt > 1500) {
         playlistLengths[currentListId] = d.info.playlist.length;
+        if (typeof d.info.playlist[0] === "string") playlistVideos[currentListId] = d.info.playlist.slice();
       }
 
       if (pendingRandomStart && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1) {
@@ -2643,7 +2659,12 @@
       playing = !playing; resumeOnReturn = playing; setPlayIcon(); setMediaSessionState(playing ? "playing" : "paused");
     });
     $("nextBtn").addEventListener("click", () => mixMode ? hopMix() : cmd("nextVideo"));
-    $("prevBtn").addEventListener("click", () => cmd("previousVideo"));
+    $("prevBtn").addEventListener("click", () => {
+      if (mixMode && mixHistory.length > 1) {
+        mixHistory.pop();
+        cmd("loadVideoById", [{videoId: mixHistory[mixHistory.length - 1]}]);
+      } else cmd("previousVideo");
+    });
     let shuffleEnabled = false;
 
     function updateShuffleButton() {
