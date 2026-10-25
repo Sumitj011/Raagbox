@@ -1537,6 +1537,36 @@
       }, delay);
     }
 
+    /* While All Shuffle is doing its "load playlist -> jump to a random song"
+       two-step (only needed the first time a playlist is used), we mute the
+       player and hold back the on-screen title, so the user never sees or
+       hears the temporary song. Everything is released after the jump. */
+    let suppressVideoUI = false, suppressTimer = null, pendingVD = null, lastHopAt = 0;
+
+    function beginSuppress(ms) {
+      suppressVideoUI = true;
+      pendingVD = null;
+      cmd("mute");
+      clearTimeout(suppressTimer);
+      suppressTimer = setTimeout(endSuppress, ms);
+    }
+
+    function endSuppress() {
+      clearTimeout(suppressTimer);
+      if (!suppressVideoUI) return;
+      suppressVideoUI = false;
+      cmd("unMute");
+      if (pendingVD) {
+        // replay the latest held-back title through the normal message handler
+        const vd = pendingVD;
+        pendingVD = null;
+        window.dispatchEvent(new MessageEvent("message", {
+          origin: "https://www.youtube-nocookie.com",
+          data: JSON.stringify({event: "infoDelivery", info: {videoData: vd}})
+        }));
+      }
+    }
+
     function ensureMixStation() {
       stations = stations.filter(s => !s.mix);
       stations.unshift({...MIX_STATION});
@@ -1564,6 +1594,7 @@
       const id = playlistId(g.playlist);
       currentListId = id;
       lastSwitchAt = performance.now();
+      lastHopAt = performance.now();
 
       // Smooth path: we already know this playlist's video ids, so just play
       // one random video directly. No playlist reload, no skipping.
@@ -1578,6 +1609,8 @@
       }
 
       const known = playlistLengths[id];
+      // First time for this playlist: hide the temporary song (see above).
+      if (!known) beginSuppress(4000);
       // All Shuffle already picks a random playlist + random song itself,
       // so we do NOT call setShuffle here (it restarts the playlist and
       // caused the song to start and then skip).
@@ -1586,7 +1619,7 @@
         index: known ? Math.floor(Math.random() * known) : 0
       }]);
       // length not known yet: learn it once, then jump a single time
-      if (!known) armRandomStart(700);
+      if (!known) armRandomStart(0);
       else {clearTimeout(randomStartTimer); pendingRandomStart = false;}
     }
 
@@ -1775,13 +1808,24 @@
       // random entry anywhere in it.
       // remember the playlist length (ignore info that may still belong to
       // the previous playlist right after a switch)
+      // The player reports the playlist once, right after it loads (usually
+      // within the first second), so there must be NO time delay here — the
+      // old 1.5s guard threw that report away and nothing was ever cached.
+      // To avoid stale data from the previous playlist, ignore a list that
+      // is identical to one already stored under a different playlist id.
       if (currentListId && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1 &&
-        performance.now() - lastSwitchAt > 1500) {
-        playlistLengths[currentListId] = d.info.playlist.length;
-        if (typeof d.info.playlist[0] === "string") playlistVideos[currentListId] = d.info.playlist.slice();
+        typeof d.info.playlist[0] === "string") {
+        const arr = d.info.playlist;
+        const stale = Object.keys(playlistVideos).some(k => k !== currentListId &&
+          playlistVideos[k][0] === arr[0] && playlistVideos[k].length === arr.length);
+        if (stale) d.info._stale = true;
+        if (!stale) {
+          playlistLengths[currentListId] = arr.length;
+          playlistVideos[currentListId] = arr.slice();
+        }
       }
 
-      if (pendingRandomStart && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1) {
+      if (pendingRandomStart && d && d.info && !d.info._stale && Array.isArray(d.info.playlist) && d.info.playlist.length > 1) {
         pendingRandomStart = false;
         clearTimeout(randomStartTimer);
         const n = d.info.playlist.length;
@@ -1789,9 +1833,13 @@
         let r = Math.floor(Math.random() * n);
         if (r === curIdx) r = (r + 1) % n;
         cmd("playVideoAt", [r]);
+        // jump done: release the mute / held-back title shortly after
+        if (suppressVideoUI) setTimeout(endSuppress, 700);
       }
 
-      if (d && d.info && d.info.videoData) {
+      if (d && d.info && d.info.videoData && suppressVideoUI) {
+        pendingVD = d.info.videoData;   // hold back until the jump is done
+      } else if (d && d.info && d.info.videoData) {
         const title = (d.info.videoData.title || "").trim();
         const author = (d.info.videoData.author || "").trim();
 
@@ -1854,7 +1902,8 @@
         // YouTube state 0 = ended
         if (d.info.playerState === 0) {
           if (sleepEndOfSong) stopForSleep();
-          else if (mixMode) hopMix();
+          // ignore repeated "ended" reports right after we already hopped
+          else if (mixMode && performance.now() - lastHopAt > 2500) hopMix();
         }
       }
     });
