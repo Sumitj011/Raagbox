@@ -172,7 +172,7 @@
       top: 0;
       left: 0;
       right: 0;
-      z-index: 5;
+      z-index: 7;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -241,13 +241,6 @@
       margin-bottom: 1px
     }
 
-    .hud-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end
-    }
-
     .chip {
       background: rgba(8, 13, 28, .6);
       backdrop-filter: blur(5px);
@@ -264,6 +257,58 @@
     .chip:hover {
       background: rgba(242, 169, 59, .4);
       border-color: var(--marigold)
+    }
+
+    /* ---------- three-dot menu (top right) ---------- */
+    .menu-wrap {
+      position: relative;
+    }
+
+    .menu-btn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .menu-pop {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 170px;
+      background: rgba(12, 18, 38, .96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(246, 237, 221, .2);
+      border-radius: 16px;
+      padding: 6px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, .5);
+    }
+
+    .menu-pop[hidden] {
+      display: none
+    }
+
+    .menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: #F6EDDD;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .menu-item:hover {
+      background: rgba(242, 169, 59, .22);
+    }
+
+    .menu-item[hidden] {
+      display: none
     }
 
     #nowCard {
@@ -432,10 +477,6 @@
 
     :root[data-theater="on"] #themeBtn {
       color: #F2A93B;
-      border-color: #F2A93B;
-      box-shadow:
-        0 0 8px rgba(242, 169, 59, .35),
-        0 0 18px rgba(242, 169, 59, .15);
     }
 
     .rnd:hover {
@@ -1335,11 +1376,22 @@
         </div>
         <h1><span class="hi">रागबॉक्स</span>RaagBox</h1>
       </div>
-      <div class="hud-actions">
-        <button class="chip" id="loginBtn" hidden>Login</button>
-        <button class="chip" id="stationsBtn" aria-expanded="false">Stations</button>
-        <button class="chip" id="themeBtn">Light / dark</button>
-        <button class="chip" id="ownerBtn" aria-expanded="false">Manage</button>
+      <div class="menu-wrap">
+        <button class="chip menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menuPop"
+          title="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="12" cy="5" r="2" />
+            <circle cx="12" cy="12" r="2" />
+            <circle cx="12" cy="19" r="2" />
+          </svg>
+          <span class="sr">Menu</span>
+        </button>
+        <div class="menu-pop" id="menuPop" hidden>
+          <button class="menu-item" id="stationsBtn" aria-expanded="false">Stations</button>
+          <button class="menu-item" id="loginBtn" hidden>Login</button>
+          <button class="menu-item" id="themeBtn">◐ Theater</button>
+          <button class="menu-item" id="ownerBtn" aria-expanded="false">Manage</button>
+        </div>
       </div>
     </header>
 
@@ -1368,7 +1420,7 @@
 
     <div class="empty" id="empty" hidden>
       <strong>Koi station on air nahi hai</strong>
-      <p>Neeche "Stations" kholo aur ek genre chuno. Jis genre ka playlist khaali hai, use "Manage" se apna YouTube
+      <p>Menu (⋮) mein "Stations" kholo aur ek genre chuno. Jis genre ka playlist khaali hai, use "Manage" se apna YouTube
         playlist link do.</p>
     </div>
 
@@ -1468,6 +1520,23 @@
     const MIX_STATION = {en: "All Shuffle", hi: "सब मिला के", color: "#3FB58A", mix: true, playlist: ""};
     let mixMode = false, lastMixKey = "";
 
+    /* ---------- random first song ----------
+       YouTube often ignores the "index" URL parameter, so a station used to
+       always start on the same song. Instead, once the player reports the
+       real playlist (info.playlist), we jump to a random position in it. */
+    let pendingRandomStart = false;
+    let randomStartTimer = null;
+
+    function armRandomStart(delay) {
+      clearTimeout(randomStartTimer);
+      pendingRandomStart = false;
+      randomStartTimer = setTimeout(() => {
+        pendingRandomStart = true;
+        // give up after a few seconds if the player never reports the playlist
+        randomStartTimer = setTimeout(() => {pendingRandomStart = false;}, 6000);
+      }, delay);
+    }
+
     function ensureMixStation() {
       stations = stations.filter(s => !s.mix);
       stations.unshift({...MIX_STATION});
@@ -1485,7 +1554,11 @@
     function hopMix() {
       const g = pickMixStation();
       if (!g) return;
-      cmd("loadPlaylist", [{list: playlistId(g.playlist), listType: "playlist", index: Math.floor(Math.random() * 10)}]);
+      // Load from the start, then jump to a random song across the WHOLE
+      // playlist once the player reports its length (not just the first 10).
+      cmd("loadPlaylist", [{list: playlistId(g.playlist), listType: "playlist", index: 0}]);
+      // small delay so we don't act on the previous playlist's info
+      armRandomStart(700);
       setTimeout(() => cmd("setShuffle", [shuffleEnabled]), 800);
     }
 
@@ -1558,6 +1631,9 @@
     let stations = [], current = -1, playing = false, hs = null;
     let lastVideoKey = "";
     let latestPlayerTime = 0, latestPlayerTimeAt = 0, latestDuration = 0;
+    // true while the user wants music playing (used to resume after the
+    // browser pauses the iframe when the tab goes to the background)
+    let resumeOnReturn = false;
     /* ---------- storage ---------- */
     function load() {
       try {
@@ -1607,14 +1683,32 @@
       const safe = (name, fn) => {try {navigator.mediaSession.setActionHandler(name, fn);} catch (e) { } };
       safe("play", () => {
         if ($("player").hidden) {$("playBtn").click(); return;}
+        resumeOnReturn = true;
         cmd("playVideo"); playing = true; setPlayIcon(); setMediaSessionState("playing");
       });
       safe("pause", () => {
+        resumeOnReturn = false;
         cmd("pauseVideo"); playing = false; setPlayIcon(); setMediaSessionState("paused");
       });
       safe("previoustrack", () => cmd("previousVideo"));
       safe("nexttrack", () => mixMode ? hopMix() : cmd("nextVideo"));
     }
+
+    /* ---------- background playback (best effort) ----------
+       Mobile browsers often pause the YouTube iframe when the tab is hidden.
+       We can't prevent that, but we can try to resume right away, and we
+       always resume when the user comes back to the tab. */
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (!playing) return;
+        resumeOnReturn = true;
+        [400, 1500, 4000].forEach(ms => setTimeout(() => {
+          if (document.hidden && resumeOnReturn && !playing) cmd("playVideo");
+        }, ms));
+      } else if (resumeOnReturn && !playing && !$("player").hidden) {
+        cmd("playVideo");
+      }
+    });
 
     /* ---------- player bridge (YouTube postMessage, no extra script) ---------- */
     function cmd(func, args) {
@@ -1649,6 +1743,17 @@
         cmd("setVolume", [Number($("vol").value)]);
       }
 
+      // Random first song: as soon as the real playlist is known, jump to a
+      // random entry anywhere in it.
+      if (pendingRandomStart && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1) {
+        pendingRandomStart = false;
+        clearTimeout(randomStartTimer);
+        const n = d.info.playlist.length;
+        const curIdx = typeof d.info.playlistIndex === "number" ? d.info.playlistIndex : -1;
+        let r = Math.floor(Math.random() * n);
+        if (r === curIdx) r = (r + 1) % n;
+        cmd("playVideoAt", [r]);
+      }
 
       if (d && d.info && d.info.videoData) {
         const title = (d.info.videoData.title || "").trim();
@@ -2042,11 +2147,22 @@
 
       return lines.sort((a, b) => a.time - b.time);
     }
+
+    // The player only reports its time every so often, so between reports we
+    // extrapolate from the last known value. We ask for a fresh time at most
+    // about once a second (instead of on every tick) and extrapolate for up
+    // to 3s, which keeps lyrics from lagging behind the music.
+    let lastTimeRequestAt = 0;
+
     function getCurrentPlayerTime() {
-      cmd("getCurrentTime");
+      const now = performance.now();
+      if (now - lastTimeRequestAt > 900) {
+        lastTimeRequestAt = now;
+        cmd("getCurrentTime");
+      }
       let t = latestPlayerTime;
       if (playing) {
-        t += Math.min((performance.now() - latestPlayerTimeAt) / 1000, 1.5);
+        t += Math.min((now - latestPlayerTimeAt) / 1000, 3);
       }
       return Promise.resolve(t);
     }
@@ -2140,7 +2256,7 @@
       const loop = async () => {
         await updateCurrentLyric();
 
-        lyricsAnimationFrame = setTimeout(loop, 250);
+        lyricsAnimationFrame = setTimeout(loop, 120);
       };
 
       loop();
@@ -2356,7 +2472,7 @@
         $("empty").hidden = false;
         $("empty").querySelector("strong").textContent = st.en + " par abhi kuch nahi";
         $("empty").querySelector("p").textContent = 'Is station ko on air lane ke liye "Manage stations" kholo aur ek YouTube playlist link paste karo.';
-        playing = false; setPlayIcon(); setMediaSessionState("none");
+        playing = false; resumeOnReturn = false; setPlayIcon(); setMediaSessionState("none");
         return;
       }
       $("empty").hidden = true;
@@ -2365,8 +2481,10 @@
       const start = mixMode ? 1 + Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 25);
       f.src = "https://www.youtube-nocookie.com/embed/videoseries?list=" + encodeURIComponent(id) +
         "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
-      playing = true; setPlayIcon(); setMediaSessionState("playing");
+      playing = true; resumeOnReturn = true; setPlayIcon(); setMediaSessionState("playing");
       startHandshake();
+      // pick a truly random first song once the playlist length is known
+      armRandomStart(0);
       setTimeout(() => {
         cmd("setShuffle", [shuffleEnabled]);
         updateShuffleButton();
@@ -2495,7 +2613,7 @@
     $("playBtn").addEventListener("click", () => {
       if ($("player").hidden) {const first = stations.findIndex(s => playlistId(s.playlist)); if (first > -1) tune(first); return;}
       cmd(playing ? "pauseVideo" : "playVideo");
-      playing = !playing; setPlayIcon(); setMediaSessionState(playing ? "playing" : "paused");
+      playing = !playing; resumeOnReturn = playing; setPlayIcon(); setMediaSessionState(playing ? "playing" : "paused");
     });
     $("nextBtn").addEventListener("click", () => mixMode ? hopMix() : cmd("nextVideo"));
     $("prevBtn").addEventListener("click", () => cmd("previousVideo"));
@@ -2531,6 +2649,7 @@
     }
 
     function stopForSleep() {
+      resumeOnReturn = false;
       cmd("pauseVideo");
       playing = false;
       setPlayIcon();
@@ -2598,6 +2717,24 @@
     $("stationsBtn").addEventListener("click", () => {$("stationsDrawer").hidden ? openDrawer() : closeDrawer();});
     $("drawerBackdrop").addEventListener("click", closeDrawer);
     $("welcomeBtn").addEventListener("click", openDrawer);
+
+    /* ---------- three-dot menu ---------- */
+    function closeMenu() {
+      $("menuPop").hidden = true;
+      $("menuBtn").setAttribute("aria-expanded", "false");
+    }
+    $("menuBtn").addEventListener("click", e => {
+      e.stopPropagation();
+      const opening = $("menuPop").hidden;
+      $("menuPop").hidden = !opening;
+      $("menuBtn").setAttribute("aria-expanded", opening ? "true" : "false");
+    });
+    // Each item runs its own handler first, then this closes the menu.
+    $("menuPop").addEventListener("click", closeMenu);
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".menu-wrap")) closeMenu();
+    });
+
     $("addRow").addEventListener("click", () => {
       stations.push({en: "New station", hi: "", color: "#F2A93B", playlist: ""});
       renderRows(); renderStations();
@@ -2659,7 +2796,7 @@
     });
 
     document.addEventListener("keydown", e => {
-      if (e.key === "Escape") {closeDrawer(); closePanel(); $("sleepMenu").hidden = true;}
+      if (e.key === "Escape") {closeDrawer(); closePanel(); closeMenu(); $("sleepMenu").hidden = true;}
     });
     document.addEventListener("click", e => {
       if (!e.target.closest("#sleepMenu, #sleepBtn")) $("sleepMenu").hidden = true;
