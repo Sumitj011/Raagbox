@@ -1551,15 +1551,28 @@
       return g;
     }
 
+    // Playlist lengths learned from the player, so All Shuffle can load a
+    // random song in ONE step (no "starts, then skips to another song").
+    const playlistLengths = {};
+    let currentListId = "", lastSwitchAt = 0;
+
     function hopMix() {
       const g = pickMixStation();
       if (!g) return;
-      // Load from the start, then jump to a random song across the WHOLE
-      // playlist once the player reports its length (not just the first 10).
-      cmd("loadPlaylist", [{list: playlistId(g.playlist), listType: "playlist", index: 0}]);
-      // small delay so we don't act on the previous playlist's info
-      armRandomStart(700);
-      setTimeout(() => cmd("setShuffle", [shuffleEnabled]), 800);
+      const id = playlistId(g.playlist);
+      currentListId = id;
+      lastSwitchAt = performance.now();
+      const known = playlistLengths[id];
+      // All Shuffle already picks a random playlist + random song itself,
+      // so we do NOT call setShuffle here (it restarts the playlist and
+      // caused the song to start and then skip).
+      cmd("loadPlaylist", [{
+        list: id, listType: "playlist",
+        index: known ? Math.floor(Math.random() * known) : 0
+      }]);
+      // length not known yet: learn it once, then jump a single time
+      if (!known) armRandomStart(700);
+      else {clearTimeout(randomStartTimer); pendingRandomStart = false;}
     }
 
     const KEY = "raagbox.stations.v1";
@@ -1738,13 +1751,20 @@
       }
 
       if (d && d.event === "onReady") {
-        cmd("setShuffle", [shuffleEnabled]);
+        if (!mixMode) cmd("setShuffle", [shuffleEnabled]);
         updateShuffleButton();
         cmd("setVolume", [Number($("vol").value)]);
       }
 
       // Random first song: as soon as the real playlist is known, jump to a
       // random entry anywhere in it.
+      // remember the playlist length (ignore info that may still belong to
+      // the previous playlist right after a switch)
+      if (currentListId && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1 &&
+        performance.now() - lastSwitchAt > 1500) {
+        playlistLengths[currentListId] = d.info.playlist.length;
+      }
+
       if (pendingRandomStart && d && d.info && Array.isArray(d.info.playlist) && d.info.playlist.length > 1) {
         pendingRandomStart = false;
         clearTimeout(randomStartTimer);
@@ -2478,17 +2498,24 @@
       $("empty").hidden = true;
       const f = $("player");
       f.hidden = false;
-      const start = mixMode ? 1 + Math.floor(Math.random() * 10) : 1 + Math.floor(Math.random() * 25);
+      currentListId = id;
+      lastSwitchAt = performance.now();
+      const known = playlistLengths[id];
+      const start = known ? Math.floor(Math.random() * known) : 1 + Math.floor(Math.random() * 25);
       f.src = "https://www.youtube-nocookie.com/embed/videoseries?list=" + encodeURIComponent(id) +
         "&index=" + start + "&autoplay=1&enablejsapi=1&rel=0&playsinline=1&modestbranding=1";
       playing = true; resumeOnReturn = true; setPlayIcon(); setMediaSessionState("playing");
       startHandshake();
       // pick a truly random first song once the playlist length is known
-      armRandomStart(0);
-      setTimeout(() => {
-        cmd("setShuffle", [shuffleEnabled]);
-        updateShuffleButton();
-      }, 1800);
+      if (known) {clearTimeout(randomStartTimer); pendingRandomStart = false;}
+      else armRandomStart(0);
+      // All Shuffle randomizes by itself; setShuffle there would skip the song
+      if (!mixMode) {
+        setTimeout(() => {
+          cmd("setShuffle", [shuffleEnabled]);
+          updateShuffleButton();
+        }, 1800);
+      }
     }
 
     /* ---------- stations UI ---------- */
