@@ -114,13 +114,15 @@
     }
 
     .stage iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      z-index: 1
-    }
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  border: 0;
+  z-index: 1;
+  pointer-events: none
+}
 
     #wall {
       position: absolute;
@@ -1799,10 +1801,11 @@
       }
 
       if (d && d.event === "onReady") {
-        if (!mixMode) cmd("setShuffle", [shuffleEnabled]);
-        updateShuffleButton();
-        cmd("setVolume", [Number($("vol").value)]);
-      }
+  if (!mixMode) cmd("setShuffle", [shuffleEnabled]);
+  updateShuffleButton();
+  cmd("setVolume", [Number($("vol").value)]);
+  cmd("setPlaybackQuality", ["tiny"]);
+}
 
       // Random first song: as soon as the real playlist is known, jump to a
       // random entry anywhere in it.
